@@ -1,0 +1,20 @@
+{
+  "id": "ORD-011",
+  "title": "铁路网与城市化",
+  "status": "blocked",
+  "priority": 10,
+  "scores": { "impact": 3, "data": 2, "law": 3, "drama": 2 },
+  "goal": "呈现全球铁路网密度与城市化/经济水平的关系",
+  "leads": [
+    { "source": "Natural Earth 仅含主干铁路（覆盖不足）", "url": "https://www.naturalearthdata.com/", "license": "公有领域" },
+    { "source": "OpenStreetMap rail 导出（可用但大）", "url": "https://download.geofabrik.de/", "license": "ODbL" }
+  ],
+  "lawDraft": "路网密度阶梯与人均 GDP",
+  "acceptance": [
+    "找到全球一致的铁路矢量源（解除 blocker）",
+    "密度按国聚合（不逐条画线，避免体积爆炸）",
+    "verify.mjs 全绿；三账本更新"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "blocker：全球一致的铁路数据源尚无轻量开放版本。OSM 派生太重，需先立降采样方案。"
+}

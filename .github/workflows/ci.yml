@@ -21,5 +21,9 @@ jobs:
           find src -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: 世界体检（数据/契约/无头渲染/拾取回归）
         run: node scripts/verify.mjs
+      - name: 平台自检（MCP 服务器冒烟）
+        run: node platform/mcp/smoke.mjs
+      - name: 无头验收门（G1-G5）
+        run: node scripts/accept.mjs
       - name: 数据采集脚本可运行性（干跑校验参数）
         run: python3 -m py_compile scripts/fetch_data.py

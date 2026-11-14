@@ -1,18 +1,31 @@
 # 新世界 · The New World
 
-**这是一个持续迭代的项目，不是一个页面。**
+**这是一个持续迭代的项目，也是一个 agent 平台。**
 
-它做的事：把「对现实世界的认知」以**迭代**为单位砌进代码——每轮迭代从需求池选一块砖，
-取证（开放 API / GitHub 开源项目 / 搜索引擎交叉验证）→ 以代码编码 → 登记运行规律 →
-浏览器交互验收 → 记账提交。页面的世界只是历次迭代的**产物与展示层**；
-驱动它生长的，是仓库内置的持续迭代技能 `world-builder`（`.zcode/skills/world-builder/`）。
+它做的事：把「对现实世界的认知」以**迭代**为单位砌进代码。建造者是 **agent**——
+任何平台的 AI（ZCode / Proteus / Claude / …）都能接入本仓库领工单、建砖、过验收门、记账提交；
+人类是发包人与观察者，在浏览器里看世界长出来的样子。
 
 ```
  ● 真实数据（可溯源、离线可用）
  ◎ 简洁规律（历史是数据，未来是规律）
- ⟳ 持续迭代（技能驱动：选题→取证→编码→接线→验收→记账→提交）
- ▣ 浏览器交互（旋转 / 拾取 / 时间轴 / 模式切换）
+ 🤖 agent 平台（工单/角色/验收门/MCP 服务器）
+ ⟳ 持续迭代（选题→取证→编码→接线→验收→记账→提交）
+ ▣ 浏览器交互（人类观察世界的窗口）
 ```
+
+## 接入平台（让任何 agent 来施工）
+
+```json
+{ "mcpServers": { "the-new-world": {
+    "command": "node",
+    "args": ["/绝对路径/the-new-world/platform/mcp/server.mjs"] } } }
+```
+
+接入后 agent 获得 6 个平台工具：`list_orders` / `read_order` / `world_state` /
+`run_gates` / `write_ledger` / `close_order`——领单、看世界、过验收门、记账，全程无需人类。
+协议与角色契约见 **[platform/PROTOCOL.md](platform/PROTOCOL.md)**；
+施工手册见 `.zcode/skills/world-builder/`（ZCode 内自动触发）。
 
 ## 打开世界
 
@@ -74,7 +87,8 @@ python3 -m http.server 8000
 
 - ✅ 迭代 001：初建世界（引擎 + 六砖 + 交互 + 数据层 + 施工体系）
 - ✅ 迭代 002：板块与地震（USGS 快照 + PB2002 边界，L7 立法）
-- 🧭 下一轮候选：见 [BACKLOG.md](BACKLOG.md)（大河与文明带 / 全球航线网 / 洋流 / 夜间灯光…）
+- ✅ 迭代 003：agent 平台化（协议/工单/角色/无头验收门/MCP 服务器）
+- 🧭 下一轮：见 [BACKLOG.md](BACKLOG.md)——当前最高优先级工单由 agent 自行领取
 
 ## 许可
 

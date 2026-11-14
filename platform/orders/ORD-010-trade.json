@@ -1,0 +1,21 @@
+{
+  "id": "ORD-010",
+  "title": "国际贸易流",
+  "status": "open",
+  "priority": 16,
+  "scores": { "impact": 5, "data": 3, "law": 5, "drama": 3 },
+  "goal": "用双边贸易额实证引力模型：把 links 砖的随机弧线换成真实贸易流",
+  "leads": [
+    { "source": "UN Comtrade API（免费层有配额）", "url": "https://comtradeapi.un.org/", "license": "开放（署名）" },
+    { "source": "替代：CEPII BACI 数据库（GitHub 有镜像工具）", "url": "http://www.cepii.fr/CEPII/en/bdd/bdd.asp", "license": "学术免费（须核实再分发）" }
+  ],
+  "lawDraft": "L5 的完全体：双边贸易额 vs GDP·GDP/d 的回归（引力模型诞生的领域）",
+  "acceptance": [
+    "API 配额策略先行（免费层限流，需缓存与增量拉取）",
+    "主要经济体双边流数据落库（>=前20经济体）",
+    "links 砖升级：真实贸易流弧线（对照随机引力弧线）",
+    "verify.mjs 全绿；三账本更新"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "限流是主要风险：可先做主要 20 经济体×前 5 贸易伙伴的静态快照。"
+}

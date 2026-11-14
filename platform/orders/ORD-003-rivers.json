@@ -1,0 +1,19 @@
+{
+  "id": "ORD-003",
+  "title": "大河与文明带",
+  "status": "open",
+  "priority": 16,
+  "scores": { "impact": 4, "data": 5, "law": 4, "drama": 3 },
+  "goal": "把全球主要河流编码进世界，呈现'大河下游与人口密集带共现'的规律",
+  "leads": [
+    { "source": "Natural Earth rivers (ne_10m_rivers_lake_centerlines)", "url": "https://www.naturalearthdata.com/downloads/", "license": "公有领域" }
+  ],
+  "lawDraft": "L8 候选：主要河流下游/三角洲与人口密集带的共现关系",
+  "acceptance": [
+    "data/rivers.json 随仓库提交，meta 含 URL/许可/取数日期",
+    "抽样核对>=2 条已知河流（长江、亚马逊等）入海口坐标正确",
+    "砖块契约齐全，verify.mjs 全绿",
+    "三账本更新"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null, "notes": ""
+}

@@ -48,3 +48,25 @@
 - **验收证据**：`verify.mjs` 全绿；浏览器中板块边界与震中脉冲重合呈现，开关砖块正常。
 - **提交**：见 git log。
 - **遗留线索**：可加震深维度（深源地震着色）；USGS 30 天窗口可改为拉取更长历史做"地震气候"。
+
+---
+
+## 迭代 003 · agent 平台化（2026-11-14）
+
+- **目标**：把仓库从"技能驱动的迭代项目"升级为 **agent 平台**——任何平台的 agent 都能
+  领工单、建砖、过验收门、记账，全程无需人类参与。
+- **认知来源**：MCP（Model Context Protocol）开放标准；本仓库迭代 001/002 沉淀的施工法。
+- **产物**：
+  - `platform/PROTOCOL.md` —— 平台宪法（工单状态机 / 流水线 / 验收门 / 红线）
+  - `platform/orders/` —— 9 张机器可读工单（ORD-003…011，含评分/线索/验收标准/状态机）
+  - `platform/roles/` —— 四角色契约：勘测员 / 砌砖师 / 质检员 / 史官
+  - `scripts/accept.mjs` —— 无头验收门 G1-G5（语法 / 体检 / 平台自检 / 数据纪律 / 账本纪律）
+  - `platform/mcp/server.mjs` —— 零依赖 MCP 服务器（6 工具：list_orders / read_order /
+    world_state / run_gates / write_ledger / close_order，服务端强制账本格式与工单状态机）
+  - `platform/mcp/smoke.mjs` + `README.md` —— 平台自检与接入文档
+- **新规律**：无（平台类迭代，世界本体未动）。
+- **验收证据**：`accept.mjs` 五道门全 PASS；MCP 冒烟 8/8（握手/工具/工单/世界状态/
+  账本校验拦截）；世界本体零改动（src/ 与 data/ 未动，浏览器门豁免）。
+- **提交**：见 git log。
+- **遗留线索**：让 Proteus 等外部 agent 平台实际接入施工一轮（迭代 004 可从 ORD-004 航线网开始）；
+  工单可加"认领超时自动回收"。

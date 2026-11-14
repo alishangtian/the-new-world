@@ -1,0 +1,19 @@
+{
+  "id": "ORD-006",
+  "title": "时区与人",
+  "status": "open",
+  "priority": 14,
+  "scores": { "impact": 3, "data": 5, "law": 3, "drama": 3 },
+  "goal": "呈现全球时区边界与'社会正午'对自然正午的偏离",
+  "leads": [
+    { "source": "IANA tzdata（时间戳规则）", "url": "https://www.iana.org/time-zones", "license": "公有领域样式" },
+    { "source": "timezone-boundary-builder (GitHub: evansiroky/timezone-boundary-builder)", "url": "https://github.com/evansiroky/timezone-boundary-builder", "license": "ODbL" }
+  ],
+  "lawDraft": "L10 候选：社会时 vs 太阳时的偏差谱（中国全境 UTC+8 的极端案例）",
+  "acceptance": [
+    "时区多边形数据落库（体积控制在 2MB 内，必要时简化）",
+    "正午偏差着色渲染正确（e.g. 中国西部偏差 > 2h）",
+    "verify.mjs 全绿；三账本更新"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null, "notes": ""
+}

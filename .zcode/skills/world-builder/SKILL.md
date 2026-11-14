@@ -22,9 +22,11 @@ description: the-new-world 仓库的持续迭代引擎——每次被要求"继�
 SELECT → RESEARCH → ENCODE → WIRE → VERIFY → LEDGER → COMMIT
 ```
 
-### 1. SELECT 选题
-- 用户指定了主题 → 直接用。
-- 没指定 → 从 `BACKLOG.md` 取最高优先级的候选。
+### 1. SELECT 选题（领单）
+- 用户指定了主题 → 找/立对应工单。
+- 没指定 → 从 `platform/orders/`（机器可读工单，canonical）取最高优先级的 `open` 工单；
+  接了平台 MCP 就直接 `list_orders` / `read_order`。
+- 领单动作：工单置 `claimed` 并写 `claimedBy`（你的标识）与 `claimedAt`（ISO 日期）。
 - 一轮迭代 = **一块砖**（一个可独立验收的认知单元）。不允许多砖混着半成品合并。
 
 ### 2. RESEARCH 取证（认知来自真实世界）
@@ -45,19 +47,23 @@ SELECT → RESEARCH → ENCODE → WIRE → VERIFY → LEDGER → COMMIT
 
 ### 5. VERIFY 验收（两道门，都不可跳）
 ```bash
-node scripts/verify.mjs        # 门一：数据完整性 + 砖块契约 + 无头渲染 + 拾取回归，全绿
-python3 -m http.server 8000    # 门二：浏览器交互验收
+node scripts/accept.mjs        # 门一：无头验收门 G1-G5（语法/体检/平台自检/数据纪律/账本纪律）
+python3 -m http.server 8000    # 门二：仓库根目录起 HTTP；必须走 HTTP，file:// 加载不了数据
 ```
-- 浏览器里实际操作：开关新砖、拖拽旋转、点击国家、拨时间轴；`window.__world` 是诊断口
+- 门一接了平台 MCP 可直接调 `run_gates` 工具。
+- 门二浏览器里实际操作：开关新砖、拖拽旋转、点击国家、拨时间轴；`window.__world` 是诊断口
   （`engine.errors` 看被隔离的故障；离屏 canvas 单渲某块砖数像素可定位"无错误无画面"类问题）。
 - 帧率显著下降 → 先合批/预计算，不许砍数据交差。
+- 世界本体（src/data）未动的平台类改动，门二可豁免。
 
 ### 6. LEDGER 记账（迭代以账本为准）
 - `docs/ITERATIONS.md` 追加一轮（格式见该文件顶部模板）：目标/来源/产物/新规律/验收证据/提交号/遗留线索。
-- `BACKLOG.md` 勾掉已完成项；`docs/DATA_SOURCES.md` 登记新数据集。
+- `BACKLOG.md` 人读总览与 `platform/orders/*.json` 工单状态同步（不许漂移）；
+  `docs/DATA_SOURCES.md` 登记新数据集。
+- 接了平台 MCP 可用 `write_ledger` / `close_order`（服务端强制格式与迭代号唯一）。
 
 ### 7. COMMIT 提交
-- 提交信息用砖块叙事：`迭代 NNN · <主题>：<一句话>`。
+- 提交信息用迭代叙事：`迭代 NNN · <主题>：<一句话>`。
 - 推送到 `origin/main`。本轮结束；下一轮从 SELECT 重新开始。
 
 ## 完成定义（DoD，逐条过）
@@ -106,4 +112,13 @@ export default registerModule({
 });
 ```
 
-然后：LAWS.md 立法 → verify.mjs 全绿 → 浏览器验收 → 记账 → 提交。
+然后：LAWS.md 立法 → accept.mjs 全绿 → 浏览器验收 → 记账 → 提交。
+
+## 平台工具（本仓库是 agent 平台）
+
+- **工单**：`platform/orders/*.json` 是机器可读的需求池（canonical），`BACKLOG.md` 是人读总览。
+- **角色**：勘测员 / 砌砖师 / 质检员 / 史官——流水线契约见 `platform/roles/`，可一人分饰。
+- **协议**：工单状态机、验收门、红线见 `platform/PROTOCOL.md`（平台宪法）。
+- **MCP**：`platform/mcp/server.mjs` 把 list_orders / read_order / world_state / run_gates /
+  write_ledger / close_order 暴露为工具，任何 agent 平台可接入（配置见 platform/mcp/README.md）。
+- **验收门**：`node scripts/accept.mjs`（G1 语法 / G2 体检 / G3 平台自检 / G4 数据纪律 / G5 账本纪律）。

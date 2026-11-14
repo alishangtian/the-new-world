@@ -66,7 +66,13 @@ data/                   真实世界数据（随仓库提交，可溯源）
 scripts/
   fetch_data.py         离线采集（可重复运行）
   verify.mjs            体检：数据完整性 + 砖块契约 + 无头渲染 + 拾取回归
+platform/
+  PROTOCOL.md           平台宪法（工单状态机/流水线/验收门/红线）
+  orders/               机器可读工单（agent 的发包渠道）
+  roles/                角色契约：勘测员/砌砖师/质检员/史官
+  mcp/                  MCP 服务器 + 冒烟测试 + 接入文档
 .zcode/skills/world-builder/   持续迭代引擎（技能）+ 实战教训
 docs/                   架构 / 数据溯源 / 迭代账本
-BACKLOG.md              需求池（下一轮迭代的候选）
+BACKLOG.md              需求池人读总览（canonical 在 platform/orders/）
+scripts/accept.mjs      无头验收门 G1-G5
 ```

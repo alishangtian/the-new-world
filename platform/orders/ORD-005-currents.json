@@ -1,0 +1,21 @@
+{
+  "id": "ORD-005",
+  "title": "洋流与热量输运",
+  "status": "open",
+  "priority": 16,
+  "scores": { "impact": 5, "data": 3, "law": 4, "drama": 4 },
+  "goal": "呈现主要表层洋流（湾流/黑潮/秘鲁寒流等）与其对沿岸气候/人口的影响",
+  "leads": [
+    { "source": "NOAA 主要表层流矢量（须勘测员甄别具体开放数据集）", "url": "https://www.ncei.noaa.gov/", "license": "待核实" },
+    { "source": "教科书级简化矢量可先用人工核对表过渡", "url": "https://en.wikipedia.org/wiki/Ocean_current", "license": "CC BY-SA" }
+  ],
+  "lawDraft": "L9 候选：暖流增温/寒流降温与沿岸人口分布的共现",
+  "acceptance": [
+    "数据来源许可核实通过（blocked 解除条件）",
+    "data/currents.json 落库，>=15 条主要流且方向正确",
+    "抽样核对：湾流方向（墨西哥湾->东北大西洋）正确",
+    "verify.mjs 全绿；三账本更新"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "风险：矢量格式的洋流数据较散。可先以人工核对的教科书简化矢量过渡，标注'简化示意'。"
+}
