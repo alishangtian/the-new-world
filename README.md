@@ -1,20 +1,36 @@
-# 新世界 · The New World
+# the-new-world · agent 平台
 
-**这是一个持续迭代的项目，也是一个 agent 平台。**
+**考察世界上关于 agent 平台的真实知识，提炼成设计规律，按规律持续构建自身。**
 
-它做的事：把「对现实世界的认知」以**迭代**为单位砌进代码。建造者是 **agent**——
-任何平台的 AI（ZCode / Proteus / Claude / …）都能接入本仓库领工单、建砖、过验收门、记账提交；
-人类是发包人与观察者，在浏览器里看世界长出来的样子。
+它不是模拟地球，也不是静态页面。它是一个 **agent 平台**：
+- **建造者是 agent**——任何平台的 AI（ZCode / Proteus / Claude / …）通过 MCP 接入，
+  领工单、考察世界、升级平台、过验收门、记账提交，全程无需人类。
+- **知识有源头**——每一条认知都来自真实世界（开放规范、GitHub 开源项目、搜索引擎交叉验证），
+  三件套（来源/许可/日期）强制可溯源。
+- **升级有规律**——平台的设计规律（P1–P8）逐条引用考察条目；规律约束建造，建造更新平台。
+- **人类有窗口**——浏览器控制台（`index.html`）实时呈现工单池、知识库、设计规律、迭代账本。
 
 ```
- ● 真实数据（可溯源、离线可用）
- ◎ 简洁规律（历史是数据，未来是规律）
- 🤖 agent 平台（工单/角色/验收门/MCP 服务器）
- ⟳ 持续迭代（选题→取证→编码→接线→验收→记账→提交）
- ▣ 浏览器交互（人类观察世界的窗口）
+ 🌍 考察世界（网络事实 / 搜索引擎 / GitHub 开源项目）
+ 📚 knowledge/    认知入库（三件套溯源 + 应用位置）
+ 📜 LAWS.md       提炼设计规律（每条引用考察条目）
+ 🔨 平台升级      按规律构建（工单驱动）
+ ✅ 验收门        G1-G5 无头判定，证据优先
+ ⟳ 账本          只追加，任何 agent 可断点续跑
 ```
 
-## 接入平台（让任何 agent 来施工）
+## 快速开始
+
+```bash
+git clone https://github.com/alishangtian/the-new-world.git
+cd the-new-world
+python3 -m http.server 8000
+# 浏览器打开 http://localhost:8000 —— 平台控制台
+```
+
+零依赖、零构建、离线可用。
+
+## 接入 agent（MCP）
 
 ```json
 { "mcpServers": { "the-new-world": {
@@ -22,74 +38,33 @@
     "args": ["/绝对路径/the-new-world/platform/mcp/server.mjs"] } } }
 ```
 
-接入后 agent 获得 6 个平台工具：`list_orders` / `read_order` / `world_state` /
-`run_gates` / `write_ledger` / `close_order`——领单、看世界、过验收门、记账，全程无需人类。
-协议与角色契约见 **[platform/PROTOCOL.md](platform/PROTOCOL.md)**；
-施工手册见 `.zcode/skills/world-builder/`（ZCode 内自动触发）。
+7 个平台工具：`list_orders` / `read_order` / `platform_state` / `list_knowledge` /
+`run_gates` / `write_ledger` / `close_order`。
+之后在仓库里对 agent 说一句「继续迭代」，它就会：领工单 → 考察世界 → 提炼规律 →
+升级平台 → 过验收门 → 记账提交。协议见 **[platform/PROTOCOL.md](platform/PROTOCOL.md)**。
 
-## 打开世界
+## 设计规律（摘要，全部见 [LAWS.md](LAWS.md)）
 
-```bash
-git clone https://github.com/alishangtian/the-new-world.git
-cd the-new-world
-python3 -m http.server 8000
-# 浏览器打开 http://localhost:8000
-```
+| 规律 | 一句话 | 依据 |
+|------|--------|------|
+| P1 工具先行 | 平台能力以 MCP 工具暴露，不是对话框 | [MCP 2026-07-28 规范](https://blog.modelcontextprotocol.io/posts/2026-07-28) |
+| P2 工单驱动 | 施工以机器可读工单为单位（跨 agent 任务交接） | [A2A](https://github.com/a2aproject/a2a) |
+| P3 渐进披露 | 岗位文档 = 触发元数据 + 按需正文 | [Claude Code Skills](https://code.claude.com/docs/en/skills) |
+| P4 护栏内置 | FAIL 即打回，全程可追溯 | [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) |
+| P5 显式状态机 | 流程是图 + checkpoint，不是隐式对话 | [LangGraph](https://github.com/langchain-ai/langgraph) |
+| P6 契约而非编制 | 角色是契约，可一人分饰 | [AutoGen](https://github.com/microsoft/autogen) / [CrewAI](https://github.com/crewAIInc/crewAI) |
+| P7 记忆两层 | 事件流只追加 + 知识层可检索 | [Letta](https://github.com/letta-ai/letta) / [Mem0](https://github.com/mem0ai/mem0) |
+| P8 爆炸半径最小化 | 先跑门再合并，高危必隔离 | [E2B](https://github.com/e2b-dev/E2B) / [SWE-bench](https://www.swebench.com/) |
 
-零依赖、零构建、离线可用（数据随仓库提交）。任何静态文件服务器都可以。
-
-## 你能做什么
-
-| 操作 | 效果 |
-|------|------|
-| 拖拽 / 滚轮 | 旋转地球、缩放 |
-| 点击国家 | 国别档案：人口、GDP、人均 CO₂、1960→2050 人口轨迹（实线历史 + 虚线规律外推） |
-| 拨时间轴 1960↔2050 | 城市灯火随人口律呼吸；未来由逻辑斯蒂增长模型接管 |
-| 速度档位 | 实时 / 1天/秒 / 1月/秒 / 1年/秒 / 10年/秒——看着晨昏线扫过大地 |
-| 模式：人口 / 经济 / 碳 | 各国数据 choropleth（对数色带） |
-| 左侧面板 | 六块知识砖的规律与来源，开关即拆装世界 |
-
-## 知识砖块（随迭代增长）
-
-| 砖 | 编码的现实 | 规律 | 来自迭代 |
-|----|------------|------|----------|
-| 星海 · 舞台 | 程序化星空（固定种子） | 背景律：时间由此可感 | 001 |
-| 大地 · 疆界 | 177 国真实边界 | L2 透镜律：正交投影 + 可见半球裁剪 | 001 |
-| 昼夜 · 晨昏线 | 实时太阳直射点 | L1 自转律 + L3 昼夜律（几何正确的夜半球） | 001 |
-| 生命 · 城市灯火 | 600 座真实城市 | L4 人口律：历史插值 + 逻辑斯蒂外推 | 001 |
-| 联结 · 引力航线 | 城市间大圆航线 | L5 引力律：I ∝ Pᵢ·Pⱼ/d² | 001 |
-| 碳 · 余烬 | 高排放国呼吸光环 | L6 碳律：TCRE 线性气候响应 | 001 |
-| 板块 · 震脉 | 2002 个真实震中 + 241 段板块边界 | L7 板块律：震中沿边界聚集（环太平洋带肉眼可验） | 002 |
-
-全部规律与简化假设见 **[LAWS.md](LAWS.md)**；每个数字的来源与许可见 **[docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)**；
-迭代履历见 **[docs/ITERATIONS.md](docs/ITERATIONS.md)**；下一块砖的候选池见 **[BACKLOG.md](BACKLOG.md)**。
-
-## 技术决策（为什么是领先的）
-
-- **迭代驱动，而非一次性作品**：`world-builder` 技能是项目的第一交付物——
-  任何人类或 AI 在本仓库说"继续/迭代/加一块砖"，就按七步循环长出新认知，
-  不依赖任何历史对话的上下文。
-- **零运行时依赖**：原生 ESM + Canvas 2D。不背框架，五年后依然能跑。
-- **离线优先**：数据随仓库提交，采集脚本可重复运行、幂等。
-- **可溯源强制化**：砖块契约要求 `sources` 字段，CI 校验；账本三件套（迭代/需求池/数据来源）记录每一步。
-- **规律优先于特效**：晨昏线是算出来的（不是贴图），人口未来是模型（不是动画），
-  震中是真实快照（不是装饰粒子）。
-- **质量红线自动化**：`verify.mjs` 体检（数据完整性/砖块契约/无头渲染/拾取回归）+ CI，
-  加上 `references/lessons.md` 的十条实战教训，同类错误不可能合入两次。
-
-## 持续构建
-
-在仓库里对 AI 说一句「继续迭代」即可运行一轮（或指定 BACKLOG 中的任意候选）。
-人类贡献者走同样的流程：[CONTRIBUTING.md](CONTRIBUTING.md)。
-架构说明：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+知识条目本体在 `knowledge/K-*.json`——每条含 insight（认知）、appliedTo（落地点）、sources（来源）。
 
 ## 状态
 
-- ✅ 迭代 001：初建世界（引擎 + 六砖 + 交互 + 数据层 + 施工体系）
-- ✅ 迭代 002：板块与地震（USGS 快照 + PB2002 边界，L7 立法）
-- ✅ 迭代 003：agent 平台化（协议/工单/角色/无头验收门/MCP 服务器）
-- 🧭 下一轮：见 [BACKLOG.md](BACKLOG.md)——当前最高优先级工单由 agent 自行领取
+- ✅ 迭代 001–002：世界模拟时代（已按 004 转向移除，教训沉淀在技能 references/lessons.md）
+- ✅ 迭代 003：平台化基建（协议 / 工单 / 角色 / 验收门 / MCP）
+- ✅ 迭代 004：**转向 agent 平台**——移除世界模拟，建立知识考察体系（knowledge/ + 控制台）
+- 🧭 下一轮：见 [BACKLOG.md](BACKLOG.md)——任务调度器 / agent 注册表 / 互操作层 / 记忆系统…
 
 ## 许可
 
-代码 MIT。数据许可见 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)（各数据集均为开放许可）。
+代码 MIT。知识条目的引用要求逐条标注在各自 `sources` 里。

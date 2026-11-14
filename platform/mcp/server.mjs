@@ -30,35 +30,37 @@ const findOrder = (id) => listOrders().find((o) => o.id === id || f2id(o) === id
 const f2id = (o) => o.id;
 const today = () => new Date().toISOString().slice(0, 10);
 
-const worldState = () => {
-  const modDir = join(ROOT, 'src', 'modules');
-  const bricks = readdirSync(modDir).filter((f) => f.endsWith('.js')).map((f) => {
-    const t = readFileSync(join(modDir, f), 'utf8');
-    const grab = (re) => (t.match(re) || [])[1];
-    const srcs = (t.match(/url:\s*'([^']+)'/g) || []).map((s) => s.slice(6, -1));
-    return {
-      id: grab(/id:\s*'([^']+)'/),
-      name: grab(/name:\s*'([^']+)'/),
-      order: Number(grab(/order:\s*(\d+)/) || 0),
-      laws: (t.match(/'L\d+[^']*'/g) || []).length,
-      sources: srcs.length,
-    };
-  }).sort((a, b) => a.order - b.order);
+const platformState = () => {
+  const knowledgeDir = join(ROOT, 'knowledge');
+  const knowledge = existsSync(knowledgeDir)
+    ? readdirSync(knowledgeDir).filter((f) => f.endsWith('.json'))
+        .map((f) => JSON.parse(readFileSync(join(knowledgeDir, f), 'utf8')))
+        .sort((a, b) => a.id.localeCompare(b.id))
+    : [];
 
-  const laws = (readFileSync(join(ROOT, 'LAWS.md'), 'utf8').match(/^\| L\d+ \|/gm) || []).length;
+  const laws = (readFileSync(join(ROOT, 'LAWS.md'), 'utf8').match(/^\| (P\d+) \|/gm) || []).length;
   const iter = readFileSync(LEDGER, 'utf8');
   const nums = [...iter.matchAll(/^## 迭代 (\d+) · (.+)$/gm)].map((m) => ({ n: Number(m[1]), title: m[2] }));
-  const data = readdirSync(join(ROOT, 'data')).filter((f) => f.endsWith('.json'))
-    .map((f) => ({ file: f, kb: Math.round(statSync(join(ROOT, 'data', f)).size / 1024) }));
 
   const orders = listOrders();
   const by = (s) => orders.filter((o) => o.status === s).length;
   return {
-    world: { bricks: bricks.length, laws, iterations: nums.length, lastIteration: nums.at(-1) },
-    dataFiles: data,
+    platform: { knowledge: knowledge.length, laws, iterations: nums.length, lastIteration: nums.at(-1) },
     orders: { open: by('open'), claimed: by('claimed'), blocked: by('blocked'), delivered: by('delivered') },
+    knowledgeTopics: [...new Set(knowledge.map((k) => k.topic))],
     nextByPriority: orders.find((o) => o.status === 'open') || null,
   };
+};
+
+const listKnowledge = ({ topic } = {}) => {
+  const dir = join(ROOT, 'knowledge');
+  if (!existsSync(dir)) return [];
+  let list = readdirSync(dir).filter((f) => f.endsWith('.json'))
+    .map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8')));
+  if (topic) list = list.filter((k) => (k.topic || '').includes(topic) || (k.id || '') === topic);
+  return list
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((k) => ({ id: k.id, date: k.date, topic: k.topic, title: k.title, insight: k.insight, appliedTo: k.appliedTo, sources: k.sources }));
 };
 
 const runGates = () => {
@@ -98,29 +100,32 @@ const closeOrder = ({ id, delivered_in }) => {
 
 // ---------------------------------------------------------------- 工具定义
 const TOOLS = [
-  { name: 'list_orders', description: '列出世界建造工单（按优先级降序）。SELECT 步骤的起点。',
+  { name: 'list_orders', description: '列出平台工单（按优先级降序）。SELECT 步骤的起点：领一张 open 工单施工。',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
-  { name: 'read_order', description: '读一张工单全文（目标/来源线索/验收标准/notes）。',
-    inputSchema: { type: 'object', required: ['id'], properties: { id: { type: 'string', description: '工单号，如 ORD-003' } }, additionalProperties: false } },
-  { name: 'world_state', description: '世界现状：砖块/规律/数据/迭代履历/工单分布/下一张待领工单。',
+  { name: 'read_order', description: '读一张工单全文（目标/考察线索/验收标准/notes）。',
+    inputSchema: { type: 'object', required: ['id'], properties: { id: { type: 'string', description: '工单号，如 ORD-012' } }, additionalProperties: false } },
+  { name: 'platform_state', description: '平台现状：知识条目数/设计规律数/迭代履历/工单分布/下一张待领工单。',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
-  { name: 'run_gates', description: '跑无头验收门（语法/体检/平台自检/数据纪律/账本纪律），返回 PASS/FAIL 与报告。质检员步骤的唯一裁判。',
+  { name: 'list_knowledge', description: '列出知识库——考察世界（网络/搜索引擎/GitHub）带回的 agent 平台认知，每条含来源与落地位置。可按 topic 过滤。',
+    inputSchema: { type: 'object', properties: { topic: { type: 'string', description: '按主题过滤，如 协议互操作' } }, additionalProperties: false } },
+  { name: 'run_gates', description: '跑无头验收门（语法/平台体检/自检/知识纪律/账本纪律），返回 PASS/FAIL 与报告。质检员步骤的唯一裁判。',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
   { name: 'write_ledger', description: '向 docs/ITERATIONS.md 追加一轮迭代账目（账本只追加；迭代号必须唯一且与条目首行一致）。',
     inputSchema: { type: 'object', required: ['iteration_id', 'entry_markdown'],
-      properties: { iteration_id: { type: 'string', description: '如 004' },
+      properties: { iteration_id: { type: 'string', description: '如 005' },
                     entry_markdown: { type: 'string', description: '完整条目，首行格式 "## 迭代 NNN · 标题（日期）"' } },
       additionalProperties: false } },
   { name: 'close_order', description: '把工单置为 delivered（须先过 run_gates 的 PASS）。',
     inputSchema: { type: 'object', required: ['id', 'delivered_in'],
-      properties: { id: { type: 'string' }, delivered_in: { type: 'string', description: '所在迭代号，如 004' } },
+      properties: { id: { type: 'string' }, delivered_in: { type: 'string', description: '所在迭代号，如 005' } },
       additionalProperties: false } },
 ];
 
 const handlers = {
   list_orders: () => listOrders().map((o) => ({ id: o.id, title: o.title, status: o.status, priority: o.priority, goal: o.goal, scores: o.scores })),
   read_order: ({ id }) => { const o = findOrder(id); if (!o) throw new Error(`工单不存在: ${id}`); return o; },
-  world_state: worldState,
+  platform_state: platformState,
+  list_knowledge: listKnowledge,
   run_gates: runGates,
   write_ledger: writeLedger,
   close_order: closeOrder,
@@ -137,7 +142,7 @@ const dispatch = async (msg) => {
     return reply(id, {
       protocolVersion: params?.protocolVersion || '2024-11-05',
       capabilities: { tools: { listChanged: false } },
-      serverInfo: { name: 'the-new-world', version: '0.3.0', title: '世界建造平台' },
+      serverInfo: { name: 'the-new-world', version: '0.4.0', title: 'agent 平台（考察世界 · 持续构建）' },
     });
   }
   if (method === 'ping') return reply(id, {});

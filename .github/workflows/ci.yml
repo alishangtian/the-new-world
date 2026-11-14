@@ -25,5 +25,3 @@ jobs:
         run: node platform/mcp/smoke.mjs
       - name: 无头验收门（G1-G5）
         run: node scripts/accept.mjs
-      - name: 数据采集脚本可运行性（干跑校验参数）
-        run: python3 -m py_compile scripts/fetch_data.py

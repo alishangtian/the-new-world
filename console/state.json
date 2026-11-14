@@ -1,0 +1,421 @@
+{
+  "generatedAt": "2026-11-14T03:57:03.331Z",
+  "counts": {
+    "orders": 6,
+    "ordersOpen": 6,
+    "knowledge": 8,
+    "laws": 8,
+    "iterations": 4
+  },
+  "orders": [
+    {
+      "id": "ORD-012",
+      "title": "任务调度器：让平台自主触发迭代",
+      "status": "open",
+      "priority": 18,
+      "scores": {
+        "impact": 5,
+        "data": 4,
+        "law": 4,
+        "drama": 4
+      },
+      "goal": "平台不再依赖人工触发——按计划自动领取工单并跑完考察→构建→验收→记账全循环",
+      "leads": [
+        {
+          "source": "GitHub Actions schedule 触发器",
+          "url": "https://docs.github.com/actions/using-workflows/events-that-trigger-workflows#schedule",
+          "license": "随平台"
+        },
+        {
+          "source": "node-cron 模式参考",
+          "url": "https://github.com/node-cron/node-cron",
+          "license": "MIT 参考"
+        }
+      ],
+      "lawDraft": "L9 候选（K-005）：持续构建 = 外部触发 + 显式状态机 + 断点续跑，缺一不可",
+      "acceptance": [
+        "新增 CI schedule 或调度脚本：无人工参与领取 open 工单并执行一轮循环",
+        "断点续跑：中断后重跑不产生重复迭代号（依赖账本唯一性）",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": null,
+      "claimedAt": null,
+      "deliveredIn": null,
+      "notes": "考察锚点：K-005 LangGraph checkpoint 模式。安全边界：调度器只允许开 '平台标记为 auto-ok' 的工单。"
+    },
+    {
+      "id": "ORD-013",
+      "title": "Agent 运行时注册表：agents.json 清单模式",
+      "status": "open",
+      "priority": 17,
+      "scores": {
+        "impact": 5,
+        "data": 4,
+        "law": 4,
+        "drama": 3
+      },
+      "goal": "把'谁在施工'结构化：agent 清单（角色/技能/工具/权限/最近贡献），平台据此分派与审计",
+      "leads": [
+        {
+          "source": "OpenAI Agents SDK 原语（handoffs/guardrails）",
+          "url": "https://openai.github.io/openai-agents-python/",
+          "license": "MIT 参考"
+        },
+        {
+          "source": "MCP server 能力声明模式",
+          "url": "https://modelcontextprotocol.io/specification",
+          "license": "开放规范"
+        }
+      ],
+      "lawDraft": "L10 候选（K-004）：agent 的身份 = 能力声明 + 权限边界，二者皆可机读",
+      "acceptance": [
+        "platform/agents.json schema 定稿并被 verify 校验",
+        "四角色各有一条清单实例",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": null,
+      "claimedAt": null,
+      "deliveredIn": null,
+      "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。"
+    },
+    {
+      "id": "ORD-015",
+      "title": "Agent 互操作层：工单对接 A2A 任务对象",
+      "status": "open",
+      "priority": 16,
+      "scores": {
+        "impact": 5,
+        "data": 3,
+        "law": 4,
+        "drama": 4
+      },
+      "goal": "外部 agent 平台的 agent 能以 A2A 方式发现本平台、领取工单、回传结果",
+      "leads": [
+        {
+          "source": "A2A 协议（Linux Foundation）",
+          "url": "https://github.com/a2aproject/a2a",
+          "license": "Apache-2.0"
+        }
+      ],
+      "lawDraft": "L12 候选（K-002）：平台间施工 = 发现（agent card）+ 交接（任务对象）+ 凭证（验收门结果）",
+      "acceptance": [
+        "agent card（平台能力自描述）生成器落地",
+        "工单 ↔ A2A 任务对象的最小映射实现并测试",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": null,
+      "claimedAt": null,
+      "deliveredIn": null,
+      "notes": "考察锚点：K-002。当前 MCP 已覆盖 agent↔工具，本工单补 agent↔agent。"
+    },
+    {
+      "id": "ORD-014",
+      "title": "记忆系统升级：工作记忆 vs 长期账本分离",
+      "status": "open",
+      "priority": 15,
+      "scores": {
+        "impact": 4,
+        "data": 4,
+        "law": 4,
+        "drama": 3
+      },
+      "goal": "为长任务 agent 提供'断点工作记忆'：工单施工中的中间事实可暂存、可恢复、不污染账本",
+      "leads": [
+        {
+          "source": "Letta（原 MemGPT）分层记忆",
+          "url": "https://github.com/letta-ai/letta",
+          "license": "Apache-2.0 参考"
+        },
+        {
+          "source": "Mem0 检索式记忆",
+          "url": "https://github.com/mem0ai/mem0",
+          "license": "Apache-2.0 参考"
+        }
+      ],
+      "lawDraft": "L11 候选（K-007）：记忆两层分离——事件流只追加，知识层可检索可去重",
+      "acceptance": [
+        "platform/memory/ 目录约定定稿（暂存条目 schema + 生命周期：施工中→完成即归档/销毁）",
+        "与 ITERATIONS（只追加）边界清晰：暂存内容永不进入账本",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": null,
+      "claimedAt": null,
+      "deliveredIn": null,
+      "notes": "考察锚点：K-007。"
+    },
+    {
+      "id": "ORD-017",
+      "title": "平台评估基准：agent 施工质量的回归集",
+      "status": "open",
+      "priority": 15,
+      "scores": {
+        "impact": 4,
+        "data": 3,
+        "law": 4,
+        "drama": 4
+      },
+      "goal": "从'单次验收'升级为'评估基准'：固定任务集 + 可复现判定，衡量任意 agent 在本平台的施工质量",
+      "leads": [
+        {
+          "source": "SWE-bench 评估范式",
+          "url": "https://www.swebench.com/",
+          "license": "MIT 参考"
+        }
+      ],
+      "lawDraft": "L14 候选（K-008）：平台竞争力 = 基准分，而非宣传语",
+      "acceptance": [
+        "evals/ 目录：3 个固定任务（含金标准答案与判定脚本）",
+        "不同 agent 跑分可横向比较（结果入账本）",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": null,
+      "claimedAt": null,
+      "deliveredIn": null,
+      "notes": "考察锚点：K-008 SWE-bench 范式。"
+    },
+    {
+      "id": "ORD-016",
+      "title": "工具沙箱：隔离执行与权限边界",
+      "status": "open",
+      "priority": 14,
+      "scores": {
+        "impact": 4,
+        "data": 3,
+        "law": 4,
+        "drama": 3
+      },
+      "goal": "agent 施工中的危险操作（fetch/写文件）进入显式沙箱路径，爆炸半径可控",
+      "leads": [
+        {
+          "source": "E2B 开源 agent 沙箱",
+          "url": "https://github.com/e2b-dev/E2B",
+          "license": "Apache-2.0 参考"
+        }
+      ],
+      "lawDraft": "L13 候选（K-008）：工具按爆炸半径分级，高危必隔离",
+      "acceptance": [
+        "工具分级清单定稿（只读/写入/网络）并被协议引用",
+        "高危工具的沙箱执行路径（哪怕最初只是进程级隔离）",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": null,
+      "claimedAt": null,
+      "deliveredIn": null,
+      "notes": "考察锚点：K-008。当前零依赖世界本体本身就是最小爆炸半径的实践。"
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "K-001",
+      "date": "2026-11-14",
+      "topic": "协议互操作",
+      "title": "MCP 已成为 agent 连接工具的事实标准，并走向 web 原生架构",
+      "sources": [
+        {
+          "title": "The 2026-07-28 Specification (MCP 官方博客)",
+          "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28"
+        },
+        {
+          "title": "Model Context Protocol 规范",
+          "url": "https://modelcontextprotocol.io/specification"
+        }
+      ],
+      "insight": "MCP 2026-07-28 是发布以来最大修订：agent 基础设施向 web 的成熟模式看齐——无状态、可缓存、可路由、全球分布。工具不再是对话框里的插件，而是平台能力的标准暴露面。",
+      "appliedTo": "platform/mcp/server.mjs——平台全部能力（工单/验收门/账本）以 MCP 工具暴露；工单与账本设计为无状态资源，任何 agent 可无上下文接管。"
+    },
+    {
+      "id": "K-002",
+      "date": "2026-11-14",
+      "topic": "协议互操作",
+      "title": "A2A（Linux Foundation）补齐 agent↔agent 互操作：MCP 管 agent↔工具，A2A 管 agent↔agent",
+      "sources": [
+        {
+          "title": "a2aproject/A2A (GitHub, Linux Foundation)",
+          "url": "https://github.com/a2aproject/a2a"
+        },
+        {
+          "title": "Top 5 AI Agent Protocols in 2026",
+          "url": "https://techwithibrahim.medium.com/top-5-ai-agent-protocols-to-know-in-2026-e2148d1abf1b"
+        }
+      ],
+      "insight": "2026 年的分工格局：MCP 覆盖 agent↔工具，A2A 覆盖 agent↔agent 的发现、任务交接与安全通信，且已厂商中立（LangGraph 代理可直接把任务交给 CrewAI 代理，无需粘合代码）。",
+      "appliedTo": "platform/orders/ 工单 = 跨 agent 任务交接的最小载体（结构化目标+验收标准，而非自由文本）；ORD-015 将把工单升级为 A2A 兼容的任务对象。"
+    },
+    {
+      "id": "K-003",
+      "date": "2026-11-14",
+      "topic": "agent 工程",
+      "title": "Claude Code 的技能/子代理模式：渐进披露 + 岗位文档",
+      "sources": [
+        {
+          "title": "Claude Code Skills 文档",
+          "url": "https://code.claude.com/docs/en/skills"
+        },
+        {
+          "title": "Claude Code Subagents 文档",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        }
+      ],
+      "insight": "技能 = 有元数据（name/description 触发条件）+ 按需加载正文的岗位文档；子代理 = 带独立上下文的角色化执行体。渐进披露（元数据常驻、正文触发才加载）是控制上下文成本的关键模式。",
+      "appliedTo": ".zcode/skills/world-builder/SKILL.md 采用相同结构（触发式加载 + references/ 分层）；platform/roles/ 四角色即子代理岗位文档。"
+    },
+    {
+      "id": "K-004",
+      "date": "2026-11-14",
+      "topic": "agent 工程",
+      "title": "OpenAI Agents SDK 三原语：handoffs / guardrails / tracing",
+      "sources": [
+        {
+          "title": "OpenAI Agents SDK 文档",
+          "url": "https://openai.github.io/openai-agents-python/"
+        }
+      ],
+      "insight": "主流 agent 运行时的公共原语已收敛：handoffs（角色间任务交接）、guardrails（可编程的输入输出护栏）、tracing（全程可观测）。'护栏'与'可追溯'不是可选项，是运行时的标准件。",
+      "appliedTo": "质检员角色 + scripts/accept.mjs = 平台的 guardrails（FAIL 即打回）；docs/ITERATIONS.md = tracing 落地为只追加账本。"
+    },
+    {
+      "id": "K-005",
+      "date": "2026-11-14",
+      "topic": "编排",
+      "title": "LangGraph：显式状态图 + checkpoint 持久化 + 人在环",
+      "sources": [
+        {
+          "title": "LangGraph (GitHub)",
+          "url": "https://github.com/langchain-ai/langgraph"
+        }
+      ],
+      "insight": "复杂 agent 流程的主流做法是把控制流做成显式状态图（节点/边/条件），配合 checkpoint 持久化实现断点续跑与人工介入点。隐式的'对话即流程'在长任务上不可维护。",
+      "appliedTo": "platform/PROTOCOL.md 的七步流水线是显式状态机；docs/ITERATIONS.md 是 checkpoint——任何 agent 可从上一轮账目断点续跑。"
+    },
+    {
+      "id": "K-006",
+      "date": "2026-11-14",
+      "topic": "多代理协作",
+      "title": "AutoGen / CrewAI：角色化协作的关键是'契约'而非'编制'",
+      "sources": [
+        {
+          "title": "AutoGen (GitHub, Microsoft)",
+          "url": "https://github.com/microsoft/autogen"
+        },
+        {
+          "title": "CrewAI (GitHub)",
+          "url": "https://github.com/crewAIInc/crewAI"
+        }
+      ],
+      "insight": "多代理框架的收敛结论：给 agent 的不是'人格'而是岗位契约（目标/输入/输出/禁令）；一个运行时可以身兼多角，角色切换的本质是换契约。",
+      "appliedTo": "platform/roles/ 四角色（考察员/建造师/质检员/史官）全部写成契约式文档；单人施工同样成立——换帽子即换契约。"
+    },
+    {
+      "id": "K-007",
+      "date": "2026-11-14",
+      "topic": "记忆",
+      "title": "Letta / Mem0：agent 记忆 = 只追加的事件流 + 可检索的知识层",
+      "sources": [
+        {
+          "title": "Letta (GitHub, 原 MemGPT)",
+          "url": "https://github.com/letta-ai/letta"
+        },
+        {
+          "title": "Mem0 (GitHub)",
+          "url": "https://github.com/mem0ai/mem0"
+        }
+      ],
+      "insight": "agent 记忆系统的收敛模式：事件流只追加（可审计、可回放），知识层独立组织（可检索、可去重），两层分离。改写历史 = 记忆损坏。",
+      "appliedTo": "docs/ITERATIONS.md 是只追加事件流（史官禁令：不改写历史条目）；knowledge/ 是可检索知识层（verify 校验唯一 id 与溯源）。"
+    },
+    {
+      "id": "K-008",
+      "date": "2026-11-14",
+      "topic": "安全与评估",
+      "title": "沙箱执行与评估回归是 agent 平台的地基设施",
+      "sources": [
+        {
+          "title": "E2B — 开源 agent 沙箱 (GitHub)",
+          "url": "https://github.com/e2b-dev/E2B"
+        },
+        {
+          "title": "SWE-bench — agent 施工质量的评估范式",
+          "url": "https://www.swebench.com/"
+        }
+      ],
+      "insight": "成熟 agent 平台的标配：工具在隔离沙箱中执行（爆炸半径可控），施工质量用可复现的评估基准回归（SWE-bench 范式：给任务→跑门→按证据判定）。'先跑门再合并'已是行业纪律。",
+      "appliedTo": "scripts/accept.mjs（G1-G5 无头验收门）= 平台的评估回归；run_gates 暴露为 MCP 工具；zero-dependency 世界本体 = 最小的爆炸半径。"
+    }
+  ],
+  "laws": [
+    {
+      "id": "P1",
+      "name": "工具先行",
+      "law": "平台能力一律以标准工具（MCP）暴露给 agent，而不是对话框与文档",
+      "where": "`platform/mcp/server.mjs`",
+      "evidence": "K-001"
+    },
+    {
+      "id": "P2",
+      "name": "工单驱动",
+      "law": "施工以机器可读工单为单位（目标+验收标准），不以聊天记忆为单位；工单是跨 agent 任务交接的最小载体",
+      "where": "`platform/orders/`",
+      "evidence": "K-002"
+    },
+    {
+      "id": "P3",
+      "name": "渐进披露",
+      "law": "岗位文档 = 触发元数据 + 按需加载正文；上下文是预算",
+      "where": "`.zcode/skills/world-builder/`",
+      "evidence": "K-003"
+    },
+    {
+      "id": "P4",
+      "name": "护栏内置",
+      "law": "输入输出有可编程护栏，全程可追溯；FAIL 即打回",
+      "where": "`scripts/accept.mjs` · `platform/roles/auditor.md`",
+      "evidence": "K-004"
+    },
+    {
+      "id": "P5",
+      "name": "显式状态机",
+      "law": "流程是显式的节点/边/条件，配合 checkpoint 持久化；隐式对话流不可维护",
+      "where": "`platform/PROTOCOL.md` · `docs/ITERATIONS.md`",
+      "evidence": "K-005"
+    },
+    {
+      "id": "P6",
+      "name": "契约而非编制",
+      "law": "角色是契约（目标/输入/输出/禁令），不是人格；一个运行时可身兼多角",
+      "where": "`platform/roles/`",
+      "evidence": "K-006"
+    },
+    {
+      "id": "P7",
+      "name": "记忆两层",
+      "law": "事件流只追加（可审计），知识层可检索（可去重）；改写历史 = 记忆损坏",
+      "where": "`docs/ITERATIONS.md` · `knowledge/`",
+      "evidence": "K-007"
+    },
+    {
+      "id": "P8",
+      "name": "爆炸半径最小化",
+      "law": "工具按危险度分级；'先跑门再合并'是行业纪律而非美德",
+      "where": "`scripts/accept.mjs` · PROTOCOL 红线",
+      "evidence": "K-008"
+    }
+  ],
+  "iterations": [
+    {
+      "n": 1,
+      "title": "初建世界"
+    },
+    {
+      "n": 2,
+      "title": "板块与地震"
+    },
+    {
+      "n": 3,
+      "title": "agent 平台化"
+    },
+    {
+      "n": 4,
+      "title": "转向 agent 平台"
+    }
+  ]
+}

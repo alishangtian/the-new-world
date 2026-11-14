@@ -1,0 +1,19 @@
+{
+  "id": "ORD-016",
+  "title": "工具沙箱：隔离执行与权限边界",
+  "status": "open",
+  "priority": 14,
+  "scores": { "impact": 4, "data": 3, "law": 4, "drama": 3 },
+  "goal": "agent 施工中的危险操作（fetch/写文件）进入显式沙箱路径，爆炸半径可控",
+  "leads": [
+    { "source": "E2B 开源 agent 沙箱", "url": "https://github.com/e2b-dev/E2B", "license": "Apache-2.0 参考" }
+  ],
+  "lawDraft": "L13 候选（K-008）：工具按爆炸半径分级，高危必隔离",
+  "acceptance": [
+    "工具分级清单定稿（只读/写入/网络）并被协议引用",
+    "高危工具的沙箱执行路径（哪怕最初只是进程级隔离）",
+    "verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "考察锚点：K-008。当前零依赖世界本体本身就是最小爆炸半径的实践。"
+}

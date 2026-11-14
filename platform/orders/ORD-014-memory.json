@@ -1,0 +1,20 @@
+{
+  "id": "ORD-014",
+  "title": "记忆系统升级：工作记忆 vs 长期账本分离",
+  "status": "open",
+  "priority": 15,
+  "scores": { "impact": 4, "data": 4, "law": 4, "drama": 3 },
+  "goal": "为长任务 agent 提供'断点工作记忆'：工单施工中的中间事实可暂存、可恢复、不污染账本",
+  "leads": [
+    { "source": "Letta（原 MemGPT）分层记忆", "url": "https://github.com/letta-ai/letta", "license": "Apache-2.0 参考" },
+    { "source": "Mem0 检索式记忆", "url": "https://github.com/mem0ai/mem0", "license": "Apache-2.0 参考" }
+  ],
+  "lawDraft": "L11 候选（K-007）：记忆两层分离——事件流只追加，知识层可检索可去重",
+  "acceptance": [
+    "platform/memory/ 目录约定定稿（暂存条目 schema + 生命周期：施工中→完成即归档/销毁）",
+    "与 ITERATIONS（只追加）边界清晰：暂存内容永不进入账本",
+    "verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "考察锚点：K-007。"
+}

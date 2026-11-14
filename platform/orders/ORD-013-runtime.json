@@ -1,0 +1,20 @@
+{
+  "id": "ORD-013",
+  "title": "Agent 运行时注册表：agents.json 清单模式",
+  "status": "open",
+  "priority": 17,
+  "scores": { "impact": 5, "data": 4, "law": 4, "drama": 3 },
+  "goal": "把'谁在施工'结构化：agent 清单（角色/技能/工具/权限/最近贡献），平台据此分派与审计",
+  "leads": [
+    { "source": "OpenAI Agents SDK 原语（handoffs/guardrails）", "url": "https://openai.github.io/openai-agents-python/", "license": "MIT 参考" },
+    { "source": "MCP server 能力声明模式", "url": "https://modelcontextprotocol.io/specification", "license": "开放规范" }
+  ],
+  "lawDraft": "L10 候选（K-004）：agent 的身份 = 能力声明 + 权限边界，二者皆可机读",
+  "acceptance": [
+    "platform/agents.json schema 定稿并被 verify 校验",
+    "四角色各有一条清单实例",
+    "verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。"
+}

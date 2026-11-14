@@ -1,0 +1,12 @@
+{
+  "id": "K-008",
+  "date": "2026-11-14",
+  "topic": "安全与评估",
+  "title": "沙箱执行与评估回归是 agent 平台的地基设施",
+  "sources": [
+    { "title": "E2B — 开源 agent 沙箱 (GitHub)", "url": "https://github.com/e2b-dev/E2B" },
+    { "title": "SWE-bench — agent 施工质量的评估范式", "url": "https://www.swebench.com/" }
+  ],
+  "insight": "成熟 agent 平台的标配：工具在隔离沙箱中执行（爆炸半径可控），施工质量用可复现的评估基准回归（SWE-bench 范式：给任务→跑门→按证据判定）。'先跑门再合并'已是行业纪律。",
+  "appliedTo": "scripts/accept.mjs（G1-G5 无头验收门）= 平台的评估回归；run_gates 暴露为 MCP 工具；zero-dependency 世界本体 = 最小的爆炸半径。"
+}

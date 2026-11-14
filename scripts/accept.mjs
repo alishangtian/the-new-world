@@ -44,7 +44,7 @@ let g1 = run('G1 语法', () => {
       } else if (name.endsWith('.js') || name.endsWith('.mjs')) files.push(p);
     }
   };
-  walk(join(ROOT, 'src'));
+  walk(join(ROOT, 'console'));
   walk(join(ROOT, 'scripts'));
   walk(join(ROOT, 'platform'));
   for (const f of files) {
@@ -55,35 +55,32 @@ let g1 = run('G1 语法', () => {
 });
 
 // ---------------------------------------------------------------- G2 世界体检
-let g2 = run('G2 世界体检', () => sh('node', ['scripts/verify.mjs']).split('\n').filter((l) => l.includes('✓')).length + ' 项检查全过');
+let g2 = run('G2 平台体检', () => sh('node', ['scripts/verify.mjs']).split('\n').filter((l) => l.includes('✓')).length + ' 项检查全过');
 
 // ---------------------------------------------------------------- G3 平台自检
 let g3 = run('G3 平台自检 (MCP 冒烟)', () => sh('node', ['platform/mcp/smoke.mjs']).split('\n').filter((l) => l.trim()).pop());
 
-// ---------------------------------------------------------------- G4 数据纪律
-let g4 = run('G4 数据纪律', () => {
-  const dir = join(ROOT, 'data');
+// ---------------------------------------------------------------- G4 知识纪律
+let g4 = run('G4 知识纪律', () => {
+  const dir = join(ROOT, 'knowledge');
   const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
   const bad = [];
-  let totalKB = 0;
   for (const f of files) {
     const doc = JSON.parse(readFileSync(join(dir, f), 'utf8'));
-    const meta = doc && doc.meta;
-    totalKB += statSync(join(dir, f)).size / 1024;
-    if (!meta || !(meta.source || meta.sources)) bad.push(`${f}: 缺 meta.source(s)`);
-    else if (!meta.license && !(meta.sources && Object.values(meta.sources).some((s) => /许可|licen/i.test(s)))) {
-      // sources 形式允许，license 单独字段鼓励但不强制；source 形式必须有 license
-      if (meta.source && !meta.license) bad.push(`${f}: 缺 meta.license`);
-    }
+    const srcs = doc && doc.sources;
+    if (!Array.isArray(srcs) || !srcs.length) bad.push(`${f}: 缺 sources`);
+    else for (const s of srcs) if (!/^https?:\/\//.test(s.url || '')) bad.push(`${f}: 来源 URL 非法`);
+    if (!doc.appliedTo) bad.push(`${f}: 缺 appliedTo（知识必须落到平台）`);
   }
+  const state = statSync(join(ROOT, 'console/state.json'));
+  if (Date.now() - state.mtimeMs > 7 * 86400000) bad.push('console/state.json 超过 7 天未重建');
   if (bad.length) throw new Error(bad.join('; '));
-  if (totalKB > 5 * 1024) throw new Error(`数据目录 ${Math.round(totalKB)}KB 超出 5MB 预算`);
-  return `${files.length} 个数据文件全部可溯源，共 ${Math.round(totalKB)}KB（预算 5MB）`;
+  return `${files.length} 条知识全部可溯源且标注应用位置`;
 });
 
 // ---------------------------------------------------------------- G5 账本纪律
 let g5 = run('G5 账本纪律', () => {
-  const must = ['docs/ITERATIONS.md', 'BACKLOG.md', 'docs/DATA_SOURCES.md', 'LAWS.md'];
+  const must = ['docs/ITERATIONS.md', 'BACKLOG.md', 'LAWS.md'];
   for (const f of must) {
     const text = readFileSync(join(ROOT, f), 'utf8');
     if (text.trim().length < 100) throw new Error(`${f} 空或缺内容`);

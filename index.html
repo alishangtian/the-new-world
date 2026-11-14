@@ -3,28 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="新世界 —— 用代码堆砌的现实。每块砖都来自真实数据：Natural Earth 边界、世界银行人口与经济、OWID 碳排放。">
-<title>新世界 · The New World</title>
-<link rel="stylesheet" href="src/styles.css">
+<meta name="description" content="the-new-world —— 考察世界上关于 agent 平台的真实知识，按规律持续构建自身的 agent 平台。">
+<title>the-new-world · agent 平台控制台</title>
+<link rel="stylesheet" href="console/styles.css">
 </head>
 <body>
-<canvas id="world"></canvas>
-
-<header class="brand">
-  <h1>新世界 <span>The New World</span></h1>
-  <p>用代码堆砌的现实 · 每一块砖都可溯源</p>
+<header class="top">
+  <div class="brand">
+    <h1>the-new-world <span>agent 平台</span></h1>
+    <p>考察世界上的 agent 平台知识 → 提炼规律 → 持续构建自身</p>
+  </div>
+  <nav id="tabs">
+    <a href="#/overview" data-tab="overview">总览</a>
+    <a href="#/orders" data-tab="orders">工单</a>
+    <a href="#/knowledge" data-tab="knowledge">知识库</a>
+    <a href="#/laws" data-tab="laws">设计规律</a>
+    <a href="#/iterations" data-tab="iterations">迭代账本</a>
+    <a href="#/join" data-tab="join">接入</a>
+  </nav>
 </header>
 
-<button id="panel-toggle" title="知识砖块">☰</button>
-<aside id="panel" class="glass"></aside>
+<main id="app"><div class="loading">正在加载平台状态……</div></main>
 
-<div id="hud" class="glass"></div>
-<div id="timeline" class="glass"></div>
-<div id="tooltip" class="hidden"></div>
-<div id="card" class="glass hidden"></div>
+<footer class="foot">
+  <span id="foot-state"></span>
+  <a href="https://github.com/alishangtian/the-new-world" target="_blank" rel="noopener">GitHub ↗</a>
+</footer>
 
-<div id="loader"><div class="spin"></div><p>正在搬运现实……</p></div>
-
-<script type="module" src="src/main.js"></script>
+<script type="module" src="console/app.js"></script>
 </body>
 </html>

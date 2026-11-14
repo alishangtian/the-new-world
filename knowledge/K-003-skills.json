@@ -1,0 +1,12 @@
+{
+  "id": "K-003",
+  "date": "2026-11-14",
+  "topic": "agent 工程",
+  "title": "Claude Code 的技能/子代理模式：渐进披露 + 岗位文档",
+  "sources": [
+    { "title": "Claude Code Skills 文档", "url": "https://code.claude.com/docs/en/skills" },
+    { "title": "Claude Code Subagents 文档", "url": "https://code.claude.com/docs/en/sub-agents" }
+  ],
+  "insight": "技能 = 有元数据（name/description 触发条件）+ 按需加载正文的岗位文档；子代理 = 带独立上下文的角色化执行体。渐进披露（元数据常驻、正文触发才加载）是控制上下文成本的关键模式。",
+  "appliedTo": ".zcode/skills/world-builder/SKILL.md 采用相同结构（触发式加载 + references/ 分层）；platform/roles/ 四角色即子代理岗位文档。"
+}

@@ -70,3 +70,32 @@
 - **提交**：见 git log。
 - **遗留线索**：让 Proteus 等外部 agent 平台实际接入施工一轮（迭代 004 可从 ORD-004 航线网开始）；
   工单可加"认领超时自动回收"。
+
+---
+
+## 迭代 004 · 转向 agent 平台（2026-11-14）
+
+- **目标**：纠正项目方向——本仓库不是世界模拟器，而是 **agent 平台**；"世界"指现实中
+  关于 agent 平台的知识（网络事实/搜索引擎/GitHub 开源），平台靠考察这些知识持续更新自身。
+- **认知来源**（本轮考察成果，全部入库 `knowledge/`）：
+  - K-001 MCP 2026-07-28 规范（web 原生架构）：blog.modelcontextprotocol.io/posts/2026-07-28
+  - K-002 A2A 互操作协议（Linux Foundation）：github.com/a2aproject/a2a
+  - K-003 Claude Code 技能/子代理模式：code.claude.com/docs
+  - K-004 OpenAI Agents SDK 原语（handoffs/guardrails/tracing）
+  - K-005 LangGraph 显式状态图 + checkpoint
+  - K-006 AutoGen/CrewAI 角色契约模式
+  - K-007 Letta/Mem0 记忆两层模式
+  - K-008 E2B 沙箱 + SWE-bench 评估范式
+- **产物**：
+  - 移除：世界模拟全部内容（src/ 地球引擎与六砖、data/ 地理数据、fetch_data.py、旧 index）
+  - 新增：`knowledge/`（8 条可溯源考察条目）、`LAWS.md` 重写（P1–P8 平台设计规律，逐条引用
+    K- 条目）、`platform/orders/` 6 张平台工单（调度器/注册表/记忆/互操作/沙箱/评估）、
+    `platform/PROTOCOL.md` 重写（考察→提炼→构建→验收→记账→提交）、四角色重写（考察员/建造师/
+    质检员/史官）、`console/` + `index.html` 平台控制台（工单/知识库/规律/迭代/接入，零依赖）、
+    `scripts/build_console_state.mjs`、verify.mjs 与 accept.mjs G4 适配平台、MCP 工具升级
+    （platform_state / list_knowledge）
+- **新规律**：P1–P8（LAWS.md，全部有 K- 条目支撑）。
+- **验收证据**：accept.mjs 五门全 PASS（语法/平台体检/MCP 冒烟 9 项/知识纪律/账本纪律）；
+  控制台浏览器验收（标签页切换/知识筛选/账本一致）。
+- **提交**：见 git log。
+- **遗留线索**：外部 agent 平台（Proteus）实际接入施工一轮；ORD-012 调度器让平台自主触发。

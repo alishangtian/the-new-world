@@ -1,0 +1,11 @@
+{
+  "id": "K-004",
+  "date": "2026-11-14",
+  "topic": "agent 工程",
+  "title": "OpenAI Agents SDK 三原语：handoffs / guardrails / tracing",
+  "sources": [
+    { "title": "OpenAI Agents SDK 文档", "url": "https://openai.github.io/openai-agents-python/" }
+  ],
+  "insight": "主流 agent 运行时的公共原语已收敛：handoffs（角色间任务交接）、guardrails（可编程的输入输出护栏）、tracing（全程可观测）。'护栏'与'可追溯'不是可选项，是运行时的标准件。",
+  "appliedTo": "质检员角色 + scripts/accept.mjs = 平台的 guardrails（FAIL 即打回）；docs/ITERATIONS.md = tracing 落地为只追加账本。"
+}

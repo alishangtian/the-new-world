@@ -1,78 +1,76 @@
 # 架构 · ARCHITECTURE
 
 ```
-┌───────────────────────────  浏览器（唯一运行时） ───────────────────────────┐
-│                                                                            │
-│  data/*.json ──fetch──▶ main.js（点火）                                     │
-│      │                     │                                               │
-│      │                     ├─▶ engine/engine.js   时间·镜头·拾取·渲染循环    │
-│      │                     │        ├─ math3.js     旋转矩阵·投影·slerp      │
-│      │                     │        ├─ astro.js     太阳直射点·晨昏线（L1-L3）│
-│      │                     │        └─ sims.js      时间序列·人口律（L4）      │
-│      │                     │                                               │
-│      │                     ├─▶ modules/*（知识砖块，注册即上线）              │
-│      │                     │     cosmos(0) terra(10) daynight(20)           │
-│      │                     │     life(30) links(40) quake(45) carbon(50)    │
-│      │                     │                                               │
-│      │                     └─▶ ui/*（依据砖块静态描述自动生成）               │
-│      │                          panel（砖块目录/开关）  hud（世界脉搏）       │
-│      │                          tooltip（悬停）        card（国别档案+轨迹）  │
-│                                                                           │
-│  scripts/fetch_data.py ──离线采集──▶ data/*.json（随仓库提交）              │
-│  scripts/verify.mjs ──体检：数据/契约/无头渲染/拾取回归                      │
-└────────────────────────────────────────────────────────────────────────────┘
+                      世界（网络事实 / 搜索引擎 / GitHub 开源项目）
+                          │  考察 EXPLORE（world-builder 技能 / 勘测线索）
+                          ▼
+                    knowledge/K-*.json ──提炼 DISTILL──▶ LAWS.md（P1-P8 设计规律）
+                          │                                    │
+                          │            规律约束建造 ◀──────────┘
+                          ▼
+        platform/  工单状态机 + 角色契约 + 验收门制度
+        scripts/accept.mjs  G1-G5 无头验收门（FAIL 即打回）
+        platform/mcp/server.mjs  MCP 服务器：任何 agent 平台接入施工
+                          │
+                          ▼
+        console/  index.html + app.js + state.json
+                  （人类观察窗口：工单 / 知识库 / 规律 / 迭代）
 ```
 
-## 四条施工规律
+## 六步流水线（P5 显式状态机）
 
-1. **项目以迭代为单位生长**：`world-builder` 技能驱动七步循环（选题→取证→编码→接线→验收→记账→提交），
-   每轮迭代登记进 `docs/ITERATIONS.md`，候选池在 `BACKLOG.md`。页面与数据都是迭代的产物。
-2. **数据与代码同仓库**（离线可用、可溯源，采集脚本可重复运行）。
-3. **一块砖一个文件，import 即注册**（`src/engine/modules.js` 契约 + CI 校验）；
-   **历史是数据，未来是规律**（观测末端前插值，之后交给 LAWS.md 登记的规律）。
-4. **单砖故障隔离**（一块砖抛错只下线自己，世界的渲染循环永不中断；`engine.errors` 可查）。
+```
+EXPLORE 考察 → DISTILL 提炼 → BUILD 构建 → VERIFY 验收 → LEDGER 记账 → COMMIT
+```
+
+每轮迭代在 `docs/ITERATIONS.md` 留一个 checkpoint（P5/P7）——任何 agent 可断点续跑。
+
+## 平台组件
+
+| 组件 | 路径 | 作用 |
+|------|------|------|
+| 协议 | platform/PROTOCOL.md | 工单状态机 / 流水线 / 验收门 / 红线 |
+| 工单 | platform/orders/*.json | 机器可读发包渠道（canonical） |
+| 角色 | platform/roles/ | 考察员 / 建造师 / 质检员 / 史官（契约式） |
+| 验收门 | scripts/accept.mjs | G1 语法 / G2 体检 / G3 MCP 冒烟 / G4 知识纪律 / G5 账本纪律 |
+| MCP | platform/mcp/server.mjs | 7 工具暴露平台能力（P1） |
+| 知识库 | knowledge/K-*.json | 世界考察的产物（三件套溯源 + appliedTo） |
+| 设计规律 | LAWS.md | P1-P8，逐条引用 K- 条目 |
+| 控制台 | index.html + console/ | 人类观察窗口（读 console/state.json） |
+| 技能 | .zcode/skills/world-builder/ | 持续构建引擎 + 实战教训 |
 
 ## 关键机制
 
-### 时间
-单一时钟 `time.simMs` 驱动一切：天文用毫秒、人口用浮点年（`yearOf`/`msOfYear` 互转）。
-速度档位（实时/天/月/年/10年 每秒）只改 `simMs` 的步进速率。时间轴范围 1960–2050。
+**MCP 服务器**（零依赖 stdio）：JSON-RPC over newline-delimited stdio；
+`initialize` / `tools/list` / `tools/call`；服务端强制校验（账本格式、迭代号唯一、
+工单状态机），不合规直接 isError。stdout 只承载协议消息。
 
-### 投影与裁剪
-正交投影（观测者在无穷远处）：地理单位向量经 3×3 旋转矩阵转到相机空间。
-渲染分两层：盘内裁剪（clip circle）+ 可见半球判定（v'_z ≥ 0）。
-跨地平线的环先旋转到首个背面点开始扫描，入/出边用球面线段二分求交，
-沿地平圆补短弧闭合——保证任何视角下都没有穿透地球的"穿越线"。
+**控制台状态管道**：`scripts/build_console_state.mjs` 把 orders/ + knowledge/ + LAWS.md +
+ITERATIONS.md 编译成 `console/state.json`（控制台唯一数据源）；verify 校验账本漂移，
+漂移即自动重建并对齐。
 
-### 拾取
-屏幕点 → 圆盘内判定 → 相机空间 → 转置旋转回地理向量 → 经纬度 →
-PNPOLY 射线法（扁平 Float32Array 环 + 包围盒剔除）。回归测试见 `scripts/verify.mjs`。
-
-### 性能预算
-每帧成本 = 177 国边界投影（~12k 点）+ 600 城灯火 + 120 航线（每条一次 stroke）+ 渐变填充。
-全部 O(常数) 预计算（向量、质心、伙伴拓扑）；实测 60fps（IAB 软件渲染下亦 > 55）。
+**验收门**：accept.mjs 聚合五道门并输出 `ACCEPTANCE: PASS/FAIL`（--json 可结构化）。
+FAIL 即打回；检查器自身的修改是独立工单。
 
 ## 目录地图
 
 ```
-index.html              入口（零依赖静态页）
-src/
-  main.js               点火：加载数据 → 引擎 → 砖块 → UI
-  styles.css            深空玻璃界面
-  engine/               世界的心脏（数学/天文/仿真/循环）
-  modules/              知识砖块（一块砖一个文件）
-  ui/                   面板/HUD/提示/档案（依据砖块描述自动生成）
-data/                   真实世界数据（随仓库提交，可溯源）
-scripts/
-  fetch_data.py         离线采集（可重复运行）
-  verify.mjs            体检：数据完整性 + 砖块契约 + 无头渲染 + 拾取回归
+index.html              平台控制台入口
+console/                控制台逻辑与状态
+knowledge/              世界考察知识库（K-*.json）
 platform/
-  PROTOCOL.md           平台宪法（工单状态机/流水线/验收门/红线）
-  orders/               机器可读工单（agent 的发包渠道）
-  roles/                角色契约：勘测员/砌砖师/质检员/史官
-  mcp/                  MCP 服务器 + 冒烟测试 + 接入文档
-.zcode/skills/world-builder/   持续迭代引擎（技能）+ 实战教训
-docs/                   架构 / 数据溯源 / 迭代账本
-BACKLOG.md              需求池人读总览（canonical 在 platform/orders/）
-scripts/accept.mjs      无头验收门 G1-G5
+  PROTOCOL.md           平台宪法
+  orders/               工单（canonical）
+  roles/                角色契约
+  mcp/                  MCP 服务器 + 冒烟 + 接入文档
+scripts/
+  build_console_state.mjs  控制台状态编译
+  verify.mjs            平台体检
+  accept.mjs            无头验收门 G1-G5
+.zcode/skills/world-builder/  持续构建引擎 + 实战教训
+docs/
+  ARCHITECTURE.md       本文件
+  ITERATIONS.md         迭代账本（只追加）
+LAWS.md                 设计规律（P1-P8）
+BACKLOG.md              需求池人读总览
 ```

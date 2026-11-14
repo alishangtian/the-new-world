@@ -1,0 +1,20 @@
+{
+  "id": "ORD-012",
+  "title": "任务调度器：让平台自主触发迭代",
+  "status": "open",
+  "priority": 18,
+  "scores": { "impact": 5, "data": 4, "law": 4, "drama": 4 },
+  "goal": "平台不再依赖人工触发——按计划自动领取工单并跑完考察→构建→验收→记账全循环",
+  "leads": [
+    { "source": "GitHub Actions schedule 触发器", "url": "https://docs.github.com/actions/using-workflows/events-that-trigger-workflows#schedule", "license": "随平台" },
+    { "source": "node-cron 模式参考", "url": "https://github.com/node-cron/node-cron", "license": "MIT 参考" }
+  ],
+  "lawDraft": "L9 候选（K-005）：持续构建 = 外部触发 + 显式状态机 + 断点续跑，缺一不可",
+  "acceptance": [
+    "新增 CI schedule 或调度脚本：无人工参与领取 open 工单并执行一轮循环",
+    "断点续跑：中断后重跑不产生重复迭代号（依赖账本唯一性）",
+    "verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "考察锚点：K-005 LangGraph checkpoint 模式。安全边界：调度器只允许开 '平台标记为 auto-ok' 的工单。"
+}

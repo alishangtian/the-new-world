@@ -1,0 +1,12 @@
+{
+  "id": "K-001",
+  "date": "2026-11-14",
+  "topic": "协议互操作",
+  "title": "MCP 已成为 agent 连接工具的事实标准，并走向 web 原生架构",
+  "sources": [
+    { "title": "The 2026-07-28 Specification (MCP 官方博客)", "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28" },
+    { "title": "Model Context Protocol 规范", "url": "https://modelcontextprotocol.io/specification" }
+  ],
+  "insight": "MCP 2026-07-28 是发布以来最大修订：agent 基础设施向 web 的成熟模式看齐——无状态、可缓存、可路由、全球分布。工具不再是对话框里的插件，而是平台能力的标准暴露面。",
+  "appliedTo": "platform/mcp/server.mjs——平台全部能力（工单/验收门/账本）以 MCP 工具暴露；工单与账本设计为无状态资源，任何 agent 可无上下文接管。"
+}

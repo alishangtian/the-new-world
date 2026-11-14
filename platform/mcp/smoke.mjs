@@ -57,19 +57,23 @@ try {
 
   const tools = await call('tools/list', {});
   const names = tools.tools.map((t) => t.name);
-  const want = ['list_orders', 'read_order', 'world_state', 'run_gates', 'write_ledger', 'close_order'];
+  const want = ['list_orders', 'read_order', 'platform_state', 'list_knowledge', 'run_gates', 'write_ledger', 'close_order'];
   check('tools/list 完整', want.every((w) => names.includes(w)), names.join(', '));
 
   const orders = await call('tools/call', { name: 'list_orders', arguments: {} });
   const list = JSON.parse(orders.content[0].text);
-  check('list_orders 返回工单', Array.isArray(list) && list.length >= 8, `${list.length} 张`);
+  check('list_orders 返回工单', Array.isArray(list) && list.length >= 6, `${list.length} 张`);
 
-  const state = JSON.parse((await call('tools/call', { name: 'world_state', arguments: {} })).content[0].text);
-  check('world_state 砖块>=7', state.world.bricks >= 7, `${state.world.bricks} 砖 / ${state.world.laws} 律 / ${state.world.iterations} 轮迭代`);
-  check('world_state 下一张工单', !!state.nextByPriority?.id, state.nextByPriority?.id);
+  const state = JSON.parse((await call('tools/call', { name: 'platform_state', arguments: {} })).content[0].text);
+  check('platform_state 知识库>=8', state.platform.knowledge >= 8, `${state.platform.knowledge} 知识 / ${state.platform.laws} 律 / ${state.platform.iterations} 轮迭代`);
+  check('platform_state 下一张工单', !!state.nextByPriority?.id, state.nextByPriority?.id);
 
-  const one = JSON.parse((await call('tools/call', { name: 'read_order', arguments: { id: 'ORD-003' } })).content[0].text);
-  check('read_order 读全文', one.id === 'ORD-003' && Array.isArray(one.acceptance), one.title);
+  const kn = JSON.parse((await call('tools/call', { name: 'list_knowledge', arguments: {} })).content[0].text);
+  const allTraced = kn.every((k) => Array.isArray(k.sources) && k.sources.length && k.appliedTo);
+  check('list_knowledge 全部可溯源', kn.length >= 8 && allTraced, `${kn.length} 条`);
+
+  const one = JSON.parse((await call('tools/call', { name: 'read_order', arguments: { id: 'ORD-012' } })).content[0].text);
+  check('read_order 读全文', one.id === 'ORD-012' && Array.isArray(one.acceptance), one.title);
 
   const bad = await call('tools/call', { name: 'write_ledger', arguments: { iteration_id: '999', entry_markdown: '## 错误格式' } });
   check('write_ledger 校验拦截', bad.isError === true, '格式非法被拒');

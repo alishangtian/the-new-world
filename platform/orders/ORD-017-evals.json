@@ -1,0 +1,19 @@
+{
+  "id": "ORD-017",
+  "title": "平台评估基准：agent 施工质量的回归集",
+  "status": "open",
+  "priority": 15,
+  "scores": { "impact": 4, "data": 3, "law": 4, "drama": 4 },
+  "goal": "从'单次验收'升级为'评估基准'：固定任务集 + 可复现判定，衡量任意 agent 在本平台的施工质量",
+  "leads": [
+    { "source": "SWE-bench 评估范式", "url": "https://www.swebench.com/", "license": "MIT 参考" }
+  ],
+  "lawDraft": "L14 候选（K-008）：平台竞争力 = 基准分，而非宣传语",
+  "acceptance": [
+    "evals/ 目录：3 个固定任务（含金标准答案与判定脚本）",
+    "不同 agent 跑分可横向比较（结果入账本）",
+    "verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
+  "notes": "考察锚点：K-008 SWE-bench 范式。"
+}
