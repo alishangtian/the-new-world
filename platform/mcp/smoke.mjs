@@ -75,6 +75,9 @@ try {
   const one = JSON.parse((await call('tools/call', { name: 'read_order', arguments: { id: 'ORD-012' } })).content[0].text);
   check('read_order 读全文', one.id === 'ORD-012' && Array.isArray(one.acceptance), one.title);
 
+  const disp = JSON.parse((await call('tools/call', { name: 'dispatch_next', arguments: { dry: true } })).content[0].text);
+  check('dispatch_next 观测模式', typeof disp.dispatched === 'boolean', disp.dispatched ? `将派 ${disp.orderId}` : disp.reason);
+
   const bad = await call('tools/call', { name: 'write_ledger', arguments: { iteration_id: '999', entry_markdown: '## 错误格式' } });
   check('write_ledger 校验拦截', bad.isError === true, '格式非法被拒');
 

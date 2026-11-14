@@ -14,6 +14,7 @@
 | P6 | 契约而非编制 | 角色是契约（目标/输入/输出/禁令），不是人格；一个运行时可身兼多角 | `platform/roles/` | K-006 |
 | P7 | 记忆两层 | 事件流只追加（可审计），知识层可检索（可去重）；改写历史 = 记忆损坏 | `docs/ITERATIONS.md` · `knowledge/` | K-007 |
 | P8 | 爆炸半径最小化 | 工具按危险度分级；'先跑门再合并'是行业纪律而非美德 | `scripts/accept.mjs` · PROTOCOL 红线 | K-008 |
+| P9 | 自主触发 | 持续构建 = 心跳（定时触发）+ 确定性派单（只派 auto-ok 工单）+ 断点续跑（账本唯一迭代号）；心跳只发令，需要认知与代码的施工交给接入的 agent | `platform/scheduler.mjs` · `.github/workflows/tick.yml` | K-005 · K-009 |
 
 ## 提炼纪律
 

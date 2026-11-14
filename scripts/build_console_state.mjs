@@ -2,7 +2,7 @@
 // 控制台状态构造器 —— 把平台资产（工单/知识/规律/账本）编译成 console/state.json。
 // 控制台是零依赖静态页：只读这一个 JSON。verify 会校验 state 与账本一致。
 
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,11 +21,12 @@ const knowledge = readdirSync(join(ROOT, 'knowledge'))
   .map((f) => JSON.parse(readFileSync(join(ROOT, 'knowledge', f), 'utf8')))
   .sort((a, b) => a.id.localeCompare(b.id));
 
-// 设计规律（LAWS.md 表格：| 编号 | 名称 | 规律 | 落地位置 | 依据 |）
-const laws = (read('LAWS.md').match(/^\| (P\d+) \| (.+?) \| (.+?) \| (.+?) \| (K-\d+) \|$/gm) || [])
+// 设计规律（LAWS.md 表格：| 编号 | 名称 | 规律 | 落地位置 | 依据 |；依据可含多条 K- 引用）
+const laws = (read('LAWS.md').match(/^\| P\d+ \|.+$/gm) || [])
   .map((row) => {
-    const [, id, name, law, where, kid] = row.split('|').map((s) => s.trim());
-    return { id, name, law, where, evidence: kid };
+    const cols = row.split('|').map((s) => s.trim()).filter((s) => s.length);
+    const [id, name, law, where, evidence] = cols;
+    return { id, name, law, where, evidence };
   });
 
 // 迭代账目
@@ -49,6 +50,21 @@ const state = {
   laws,
   iterations,
 };
+
+// 调度器（P9 自主触发）
+const schedPath = join(ROOT, 'platform', 'schedule.json');
+if (existsSync(schedPath)) {
+  const ticks = JSON.parse(readFileSync(schedPath, 'utf8'));
+  const autoOpen = orders
+    .filter((o) => o.status === 'open' && o.auto === true)
+    .map((o) => ({ id: o.id, title: o.title, priority: o.priority }));
+  const dispatches = ticks.filter((t) => t.type === 'dispatch');
+  state.scheduler = {
+    autoOpen,
+    lastTick: ticks.at(-1) || null,
+    dispatches: dispatches.length,
+  };
+}
 
 const out = join(ROOT, 'console', 'state.json');
 writeFileSync(out, JSON.stringify(state, null, 2));

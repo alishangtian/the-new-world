@@ -44,6 +44,19 @@ EXPLORE(考察) → DISTILL(提炼) → BUILD(构建) → VERIFY(验收) → LED
 
 一个 agent 可身兼全部角色；角色是契约不是编制（P6）。
 
+## 2.5 调度与自主触发（P9）
+
+心跳（CI tick / 定时任务 / agent）调用 `platform/scheduler.mjs`，它做三件**确定性**的事：
+
+1. **回收**：认领超 7 天未交付的工单自动回到 open（认领不是占坑；`--reclaim-days` 可调）。
+2. **派单**：只派 `"auto": true` 的 open 工单（auto 标记由发令人设置——哪些活允许自主施工，是人类的决定）；`--force <id>` 可人工越权派单。
+3. **发令**：施工包落盘 `platform/dispatch/`，含下一轮迭代号（从账本推算——账本唯一性即断点续跑）与逐条 runbook。
+
+纪律：
+- 心跳只发令。需要认知（考察）与代码（建造）的步骤，交给接入的 agent 按 `runbook` 执行。
+- 派单日志 `platform/schedule.json` 只追加；施工包随仓库提交，是"谁在何时被派了什么活"的凭证。
+- CI 心跳（tick.yml）以 `--dry` 观测模式运行——CI 不认领工单（认领必须与施工方绑定）。
+
 ## 3. 验收门（scripts/accept.mjs）
 
 | 门 | 检查 |

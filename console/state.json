@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-14T03:57:03.331Z",
+  "generatedAt": "2026-11-14T04:25:19.814Z",
   "counts": {
     "orders": 6,
-    "ordersOpen": 6,
-    "knowledge": 8,
-    "laws": 8,
-    "iterations": 4
+    "ordersOpen": 4,
+    "knowledge": 9,
+    "laws": 9,
+    "iterations": 5
   },
   "orders": [
     {
       "id": "ORD-012",
       "title": "任务调度器：让平台自主触发迭代",
-      "status": "open",
+      "status": "delivered",
       "priority": 18,
       "scores": {
         "impact": 5,
@@ -38,15 +38,17 @@
         "断点续跑：中断后重跑不产生重复迭代号（依赖账本唯一性）",
         "verify/accept 全绿；账本登记"
       ],
-      "claimedBy": null,
-      "claimedAt": null,
-      "deliveredIn": null,
-      "notes": "考察锚点：K-005 LangGraph checkpoint 模式。安全边界：调度器只允许开 '平台标记为 auto-ok' 的工单。"
+      "claimedBy": "zcode(bigmodel) · 迭代 005 演示",
+      "claimedAt": "2026-11-14T03:30:00Z",
+      "deliveredIn": "005",
+      "notes": "考察锚点：K-005 LangGraph checkpoint 模式。安全边界：调度器只允许开 '平台标记为 auto-ok' 的工单。",
+      "auto": true,
+      "acceptedAt": "2026-11-14"
     },
     {
       "id": "ORD-013",
       "title": "Agent 运行时注册表：agents.json 清单模式",
-      "status": "open",
+      "status": "claimed",
       "priority": 17,
       "scores": {
         "impact": 5,
@@ -73,10 +75,11 @@
         "四角色各有一条清单实例",
         "verify/accept 全绿；账本登记"
       ],
-      "claimedBy": null,
-      "claimedAt": null,
+      "claimedBy": "scheduler (auto)",
+      "claimedAt": "2026-11-14T04:25:03.620Z",
       "deliveredIn": null,
-      "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。"
+      "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。",
+      "auto": true
     },
     {
       "id": "ORD-015",
@@ -340,6 +343,24 @@
       ],
       "insight": "成熟 agent 平台的标配：工具在隔离沙箱中执行（爆炸半径可控），施工质量用可复现的评估基准回归（SWE-bench 范式：给任务→跑门→按证据判定）。'先跑门再合并'已是行业纪律。",
       "appliedTo": "scripts/accept.mjs（G1-G5 无头验收门）= 平台的评估回归；run_gates 暴露为 MCP 工具；zero-dependency 世界本体 = 最小的爆炸半径。"
+    },
+    {
+      "id": "K-009",
+      "date": "2026-11-14",
+      "topic": "自主循环",
+      "title": "CI 定时触发（schedule + cron，UTC，最小间隔 5 分钟）是 agent 自主循环的最简发令枪",
+      "sources": [
+        {
+          "title": "GitHub Actions workflow 语法（官方文档）",
+          "url": "https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions"
+        },
+        {
+          "title": "Events that trigger workflows（schedule 事件）",
+          "url": "https://docs.github.com/actions/using-workflows/triggering-a-workflow"
+        }
+      ],
+      "insight": "GitHub Actions 原生支持 POSIX cron 定时触发（UTC，最小 5 分钟间隔，高峰期可能延迟），无需自建调度器即可让仓库获得'心跳'。但心跳只是发令枪：真正自主循环 = 心跳（触发）+ 显式状态机（决定做什么）+ 断点续跑（账本），三者缺一不可；CI 环境只适合做确定性决策（选工单/发令），需要 LLM 的施工仍应交给接入的 agent。",
+      "appliedTo": "platform/scheduler.mjs（确定性派单：只派 auto-ok 工单、认领超时自动回收、派单包落盘）+ .github/workflows/tick.yml（每日心跳，--dry 观测模式）。"
     }
   ],
   "laws": [
@@ -398,6 +419,13 @@
       "law": "工具按危险度分级；'先跑门再合并'是行业纪律而非美德",
       "where": "`scripts/accept.mjs` · PROTOCOL 红线",
       "evidence": "K-008"
+    },
+    {
+      "id": "P9",
+      "name": "自主触发",
+      "law": "持续构建 = 心跳（定时触发）+ 确定性派单（只派 auto-ok 工单）+ 断点续跑（账本唯一迭代号）；心跳只发令，需要认知与代码的施工交给接入的 agent",
+      "where": "`platform/scheduler.mjs` · `.github/workflows/tick.yml`",
+      "evidence": "K-005 · K-009"
     }
   ],
   "iterations": [
@@ -416,6 +444,21 @@
     {
       "n": 4,
       "title": "转向 agent 平台"
+    },
+    {
+      "n": 5,
+      "title": "任务调度器"
     }
-  ]
+  ],
+  "scheduler": {
+    "autoOpen": [],
+    "lastTick": {
+      "id": "dispatch-006-ORD-013-20261114042503",
+      "type": "dispatch",
+      "orderId": "ORD-013",
+      "iteration": "006",
+      "at": "2026-11-14T04:25:03.620Z"
+    },
+    "dispatches": 2
+  }
 }

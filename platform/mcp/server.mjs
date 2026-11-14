@@ -98,6 +98,14 @@ const closeOrder = ({ id, delivered_in }) => {
   return { closed: order.id, deliveredIn: order.deliveredIn };
 };
 
+const dispatchNext = ({ dry } = {}) => {
+  const args = ['platform/scheduler.mjs', '--json'];
+  if (dry) args.push('--dry');
+  const r = spawnSync('node', args, { cwd: ROOT, encoding: 'utf8', timeout: 60000 });
+  if (r.status !== 0 && !r.stdout) throw new Error(`调度器失败: ${(r.stderr || '').slice(0, 200)}`);
+  try { return JSON.parse(r.stdout); } catch { return { raw: (r.stdout || r.stderr || '').trim() }; }
+};
+
 // ---------------------------------------------------------------- 工具定义
 const TOOLS = [
   { name: 'list_orders', description: '列出平台工单（按优先级降序）。SELECT 步骤的起点：领一张 open 工单施工。',
@@ -119,6 +127,8 @@ const TOOLS = [
     inputSchema: { type: 'object', required: ['id', 'delivered_in'],
       properties: { id: { type: 'string' }, delivered_in: { type: 'string', description: '所在迭代号，如 005' } },
       additionalProperties: false } },
+  { name: 'dispatch_next', description: '调用平台调度器：回收超时认领、派发下一张 auto-ok 工单并生成施工包。dry=true 只观测不落盘。',
+    inputSchema: { type: 'object', properties: { dry: { type: 'boolean', description: '观测模式（默认 false）' } }, additionalProperties: false } },
 ];
 
 const handlers = {
@@ -129,6 +139,7 @@ const handlers = {
   run_gates: runGates,
   write_ledger: writeLedger,
   close_order: closeOrder,
+  dispatch_next: dispatchNext,
 };
 
 // ---------------------------------------------------------------- JSON-RPC (stdio)

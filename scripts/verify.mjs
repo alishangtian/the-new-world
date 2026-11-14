@@ -3,7 +3,7 @@
 // 用法：node scripts/verify.mjs
 // 原则：平台的每一次升级，都必须能通过这里的一次体检。
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -70,14 +70,49 @@ const lawRows = lawsText.match(/^\| P\d+ \|.+$/gm) || [];
 const kIds = new Set(knowledge.map((k) => k.id));
 let cited = 0;
 for (const row of lawRows) {
-  const kid = (row.match(/\| (K-\d+) \|$/) || [])[1];
-  if (!kid) { fail(`规律行缺依据条目: ${row.slice(0, 40)}…`); continue; }
-  if (!kIds.has(kid)) { fail(`规律引用了不存在的条目: ${kid}`); continue; }
+  // 依据列可含多条引用（如 "K-005 · K-009"），逐个校验
+  const kids = (row.match(/K-\d+/g) || []);
+  if (!kids.length) { fail(`规律行缺依据条目: ${row.slice(0, 40)}…`); continue; }
+  const bad = kids.filter((kid) => !kIds.has(kid));
+  if (bad.length) { fail(`规律引用了不存在的条目: ${bad.join(',')}`); continue; }
   cited++;
 }
 if (cited === lawRows.length && cited >= 5) ok(`${cited} 条设计规律全部有考察条目支撑`);
 const orphanK = knowledge.filter((k) => !lawsText.includes(k.id));
 if (orphanK.length) console.log(`  · 提示：${orphanK.length} 条知识尚未被规律引用（合法——知识可以先于规律存在）`);
+
+// ---------------------------------------------------------------- 调度纪律
+console.log('[3.5/4] 调度纪律（P9）');
+try {
+  const schedPath = join(ROOT, 'platform/schedule.json');
+  if (existsSync(schedPath)) {
+    const ticks = JSON.parse(readFileSync(schedPath, 'utf8'));
+    if (!Array.isArray(ticks)) throw new Error('schedule.json 必须是数组（只追加日志）');
+    const ids = ticks.map((t) => t.id);
+    if (new Set(ids).size !== ids.length) throw new Error('心跳日志 id 重复');
+    for (const t of ticks) {
+      if (!t.id || !t.type || isNaN(Date.parse(t.at))) throw new Error('心跳条目缺 id/type/at');
+      if (!['dispatch', 'reclaim'].includes(t.type)) throw new Error(`未知心跳类型 ${t.type}`);
+    }
+    const dispDir = join(ROOT, 'platform/dispatch');
+    if (existsSync(dispDir)) {
+      const orderIds = new Set(orders.map((o) => o.id));
+      const packets = readdirSync(dispDir).filter((f) => f.endsWith('.json'));
+      for (const f of packets) {
+        const p = JSON.parse(readFileSync(join(dispDir, f), 'utf8'));
+        if (!p.order || !orderIds.has(p.order.id)) throw new Error(`施工包 ${f} 引用未知工单`);
+        if (!p.runbook || !p.iteration) throw new Error(`施工包 ${f} 缺 runbook/iteration`);
+      }
+      ok(`心跳日志 ${ticks.length} 条 + 施工包 ${packets.length} 份合法`);
+    } else {
+      ok(`心跳日志 ${ticks.length} 条合法（尚无施工包）`);
+    }
+  } else {
+    ok('调度器尚未产生心跳（合法：心跳由 tick/agent 触发）');
+  }
+} catch (e) {
+  fail('调度纪律: ' + e.message.split('\n')[0]);
+}
 
 // ---------------------------------------------------------------- 控制台状态
 console.log('[4/4] 控制台状态一致性');

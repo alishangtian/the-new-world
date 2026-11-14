@@ -44,14 +44,23 @@ function renderOverview() {
         <h3>下一张待领工单</h3>
         ${next ? `<p style="font-size:14px;margin:6px 0"><b>${esc(next.id)}</b> · ${esc(next.title)}</p>
           <div class="sub">${esc(next.goal)}</div>
-          <div class="chips"><span class="chip open">优先级 ${next.priority}</span></div>` : '<div class="sub">池中已无待领工单——发包或考察新候选。</div>'}
+          <div class="chips"><span class="chip open">优先级 ${next.priority}</span>${next.auto === true ? '<span class="chip claimed">auto-ok · 调度器可派</span>' : ''}</div>` : '<div class="sub">池中已无待领工单——发包或考察新候选。</div>'}
       </div>
       <div class="glass card">
         <h3>最近迭代</h3>
         <p style="font-size:14px;margin:6px 0"><b>迭代 ${last.n}</b> · ${esc(last.title)}</p>
         <div class="sub">账本只追加（P7）：完整履历见「迭代账本」标签。</div>
       </div>
-    </div>`;
+    </div>
+    ${state.scheduler ? `<div class="glass card" style="margin-top:14px">
+      <h3>自主调度（P9）</h3>
+      <div class="sub">心跳 tick.yml 每日 UTC 01:00 调用调度器：回收超时认领 → 派发 auto-ok 工单 → 生成施工包。</div>
+      <div class="chips">
+        <span class="chip claimed">auto-ok 待施工 × ${state.scheduler.autoOpen.length}</span>
+        <span class="chip delivered">历史派单 × ${state.scheduler.dispatches}</span>
+        ${state.scheduler.autoOpen.map((o) => `<span class="chip open">${esc(o.id)} ${esc(o.title)}</span>`).join('')}
+      </div>
+    </div>` : ''}`;
 }
 
 // ---------------------------------------------------------------- 工单
