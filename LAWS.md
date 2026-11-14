@@ -1,34 +1,24 @@
-# 平台设计规律 · LAWS
+# 平台设计原则 · LAWS
 
-> 本平台的第一条施工原则：**规律不是拍脑袋，而是从世界上关于 agent 平台的真实知识中提炼的**
-> ——每条规律引用知识库条目（`knowledge/K-*.json`）作为依据，标注它在平台里的落地位置。
-> 考察世界的知识 → 提炼成规律 → 规律约束建造 → 建造更新平台。这就是本平台的运转方式。
+> 平台的所有代码都应该能回答一个问题：它体现了哪条原则。
+> 原则修订必须走迭代（工单 → 验收 → 账本）。
 
-| 编号 | 名称 | 规律 | 落地位置 | 依据 |
-|------|------|------|----------|------|
-| P1 | 工具先行 | 平台能力一律以标准工具（MCP）暴露给 agent，而不是对话框与文档 | `platform/mcp/server.mjs` | K-001 |
-| P2 | 工单驱动 | 施工以机器可读工单为单位（目标+验收标准），不以聊天记忆为单位；工单是跨 agent 任务交接的最小载体 | `platform/orders/` | K-002 |
-| P3 | 渐进披露 | 岗位文档 = 触发元数据 + 按需加载正文；上下文是预算 | `.zcode/skills/world-builder/` | K-003 |
-| P4 | 护栏内置 | 输入输出有可编程护栏，全程可追溯；FAIL 即打回 | `scripts/accept.mjs` · `platform/roles/auditor.md` | K-004 |
-| P5 | 显式状态机 | 流程是显式的节点/边/条件，配合 checkpoint 持久化；隐式对话流不可维护 | `platform/PROTOCOL.md` · `docs/ITERATIONS.md` | K-005 |
-| P6 | 契约而非编制 | 角色是契约（目标/输入/输出/禁令），不是人格；一个运行时可身兼多角 | `platform/roles/` | K-006 |
-| P7 | 记忆两层 | 事件流只追加（可审计），知识层可检索（可去重）；改写历史 = 记忆损坏 | `docs/ITERATIONS.md` · `knowledge/` | K-007 |
-| P8 | 爆炸半径最小化 | 工具按危险度分级；'先跑门再合并'是行业纪律而非美德 | `scripts/accept.mjs` · PROTOCOL 红线 | K-008 |
-| P9 | 自主触发 | 持续构建 = 心跳（定时触发）+ 确定性派单（只派 auto-ok 工单）+ 断点续跑（账本唯一迭代号）；心跳只发令，需要认知与代码的施工交给接入的 agent | `platform/scheduler.mjs` · `.github/workflows/tick.yml` | K-005 · K-009 |
-| P10 | 可观测一等 | 施工链路（考察→施工→交付）必须人类可回放：trace 时间线、span 检查、溯源链是控制台的一等能力，不是报表 | `console/` · `scripts/build_console_state.mjs` | K-010 |
-| P11 | 核心与传输解耦 | 平台工具核心不感知传输方式：stdio 服务本地 agent，HTTP（Streamable）服务网络 agent 与 k8s——同一核心，两种壳 | `platform/mcp/core.mjs` · `server.mjs` · `http.mjs` · `deploy/k8s/` | K-001 · K-011 |
-| P12 | 身份即清单 | agent 的身份 = 机读清单（能力/工具/权限边界），可注册、可审计；权限必须显式写 forbidden | `platform/agents.json` · MCP `list_agents`/`register_agent` | K-004 · K-006 |
+| 编号 | 名称 | 原则 | 落地位置 |
+|------|------|------|----------|
+| P1 | 工具先行 | 平台能力一律以标准工具（MCP）暴露给 agent，而不是对话框与文档 | `platform/mcp/core.mjs` |
+| P2 | 工单驱动 | 施工以机器可读工单为单位（目标+验收标准），跨 agent 可交接 | `platform/orders/` |
+| P3 | 渐进披露 | 岗位文档 = 触发元数据 + 按需加载正文；上下文是预算 | `.zcode/skills/world-builder/` |
+| P4 | 护栏内置 | 可编程验收门 + 全程可追溯；FAIL 即打回 | `scripts/accept.mjs` · `platform/roles/auditor.md` |
+| P5 | 显式状态机 | 流程是显式的节点/边/条件 + checkpoint 持久化；隐式对话流不可维护 | `platform/PROTOCOL.md` · `docs/ITERATIONS.md` |
+| P6 | 契约而非编制 | 角色是契约（目标/输入/输出/禁令），不是人格；一个运行时可身兼多角 | `platform/roles/` |
+| P7 | 记忆两层 | 事件流只追加（可审计），知识/任务层可检索（可去重）；改写历史 = 记忆损坏 | `docs/ITERATIONS.md` · `platform/data/` |
+| P8 | 爆炸半径最小化 | 工具按危险度分级；'先跑门再合并'是纪律而非美德 | `scripts/accept.mjs` |
+| P9 | 自主触发 | 持续构建 = 心跳 + 确定性派单（只派 auto-ok）+ 断点续跑；心跳只发令 | `platform/scheduler.mjs` · `tick.yml` |
+| P10 | 可观测一等 | 施工链路必须人类可回放：时间线、施工包、账本详情是控制台一等能力 | `console/` |
+| P11 | 核心与传输解耦 | 工具核心不感知传输：stdio 服务本地，HTTP 服务网络与 k8s | `platform/mcp/` · `deploy/k8s/` |
+| P12 | 身份即清单 | agent 身份 = 机读清单（能力/工具/权限边界），可注册可审计；forbidden 必填 | `platform/agents.json` |
 
-## 提炼纪律
+## 运行时约定
 
-1. 每条规律的**依据**必须是 `knowledge/` 中真实存在的考察条目（verify 校验引用存在）。
-2. 世界上的知识在变，规律也要跟着变——但**变更必须走迭代**：新考察 → 新条目 → 修规律 → 账本记录。
-3. 没有考察条目支撑的"规律"是观点，进不了这张表。
-
-## 当前认知边界（诚实声明）
-
-- 平台运行时本身是**编排层**（工单/角色/验收/账本）：真正的 LLM 推理由外部 agent
-  （ZCode / Proteus / 其他平台）承担，平台通过 MCP 与它们握手。这是有意的边界——
-  本平台不绑定任何模型供应商（依据 K-002 的厂商中立原则）。
-- `platform/mcp/server.mjs` 当前按 2024-11-05 协议版本实现；MCP 2026-07-28 的
-  web 原生架构（K-001）是对齐目标，见工单 ORD-015。
+- **LLM 缝隙**：对话经 OpenAI 兼容端点（`LLM_BASE_URL/LLM_MODEL/LLM_API_KEY` 环境变量注入），未配置时返回接入指引——平台不假装智能。
+- **运行时态**：任务与会话存 `platform/data/`（不入仓库）；长期记忆只有账本与工单。

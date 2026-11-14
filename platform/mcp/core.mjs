@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { listTasks, createTask, setTaskStatus } from '../data-store.mjs';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ORDERS = join(ROOT, 'platform', 'orders');
@@ -18,23 +19,21 @@ export const listOrders = () => readdirSync(ORDERS).filter((f) => f.endsWith('.j
 const findOrder = (id) => listOrders().find((o) => o.id === id);
 
 const platformState = () => {
-  const knowledgeDir = join(ROOT, 'knowledge');
-  const knowledge = existsSync(knowledgeDir)
-    ? readdirSync(knowledgeDir).filter((f) => f.endsWith('.json'))
-        .map((f) => JSON.parse(readFileSync(join(knowledgeDir, f), 'utf8')))
-        .sort((a, b) => a.id.localeCompare(b.id))
-    : [];
-
   const laws = (readFileSync(join(ROOT, 'LAWS.md'), 'utf8').match(/^\| (P\d+) \|/gm) || []).length;
   const iter = readFileSync(LEDGER, 'utf8');
   const nums = [...iter.matchAll(/^## 迭代 (\d+) · (.+)$/gm)].map((m) => ({ n: Number(m[1]), title: m[2] }));
+  const tasks = listTasks();
 
   const orders = listOrders();
   const by = (s) => orders.filter((o) => o.status === s).length;
   return {
-    platform: { knowledge: knowledge.length, laws, iterations: nums.length, lastIteration: nums.at(-1) },
+    platform: { agents: loadRegistry().agents.length, tasks: tasks.length, laws, iterations: nums.length, lastIteration: nums.at(-1) },
     orders: { open: by('open'), claimed: by('claimed'), blocked: by('blocked'), delivered: by('delivered') },
-    knowledgeTopics: [...new Set(knowledge.map((k) => k.topic))],
+    tasksByStatus: {
+      pending: tasks.filter((t) => t.status === 'pending').length,
+      working: tasks.filter((t) => t.status === 'working').length,
+      done: tasks.filter((t) => t.status === 'done').length,
+    },
     nextByPriority: orders.find((o) => o.status === 'open') || null,
   };
 };
@@ -133,8 +132,6 @@ export const TOOLS = [
     inputSchema: { type: 'object', required: ['id'], properties: { id: { type: 'string', description: '工单号，如 ORD-012' } }, additionalProperties: false } },
   { name: 'platform_state', description: '平台现状：知识条目数/设计规律数/迭代履历/工单分布/下一张待领工单。',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
-  { name: 'list_knowledge', description: '列出知识库——考察世界（网络/搜索引擎/GitHub）带回的 agent 平台认知，每条含来源与落地位置。可按 topic 过滤。',
-    inputSchema: { type: 'object', properties: { topic: { type: 'string', description: '按主题过滤，如 协议互操作' } }, additionalProperties: false } },
   { name: 'run_gates', description: '跑无头验收门（语法/平台体检/自检/知识纪律/账本纪律），返回 PASS/FAIL 与报告。质检员步骤的唯一裁判。',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
   { name: 'write_ledger', description: '向 docs/ITERATIONS.md 追加一轮迭代账目（账本只追加；迭代号必须唯一且与条目首行一致）。',
@@ -158,19 +155,36 @@ export const TOOLS = [
                     tools: { type: 'array', items: { type: 'string' }, description: '授予的平台工具名（必须是已存在的 MCP 工具）' },
                     note: { type: 'string' } },
       additionalProperties: false } },
+  { name: 'list_tasks', description: '列出任务看板上的任务（指挥智能体干活的通道）。',
+    inputSchema: { type: 'object', properties: { status: { type: 'string', enum: ['pending', 'working', 'done', 'cancelled'], description: '按状态过滤' } }, additionalProperties: false } },
+  { name: 'create_task', description: '创建任务：给某个智能体（或平台）下达一项工作。',
+    inputSchema: { type: 'object', required: ['title'],
+      properties: { title: { type: 'string', description: '任务标题' },
+                    agentId: { type: 'string', description: '指派的智能体 id（可空=平台通用）' },
+                    desc: { type: 'string', description: '任务描述' } },
+      additionalProperties: false } },
+  { name: 'set_task_status', description: '流转任务状态（pending/working/done/cancelled）。',
+    inputSchema: { type: 'object', required: ['id', 'status'],
+      properties: { id: { type: 'string' }, status: { type: 'string', enum: ['pending', 'working', 'done', 'cancelled'] } },
+      additionalProperties: false } },
 ];
 
 const handlers = {
   list_orders: () => listOrders().map((o) => ({ id: o.id, title: o.title, status: o.status, priority: o.priority, goal: o.goal, scores: o.scores })),
   read_order: ({ id }) => { const o = findOrder(id); if (!o) throw new Error(`工单不存在: ${id}`); return o; },
   platform_state: platformState,
-  list_knowledge: listKnowledge,
   run_gates: runGates,
   write_ledger: writeLedger,
   close_order: closeOrder,
   dispatch_next: dispatchNext,
   list_agents: listAgents,
   register_agent: registerAgent,
+  list_tasks: ({ status } = {}) => {
+    const t = listTasks();
+    return status ? t.filter((x) => x.status === status) : t;
+  },
+  create_task: createTask,
+  set_task_status: ({ id, status }) => setTaskStatus(id, status),
 };
 
 /**

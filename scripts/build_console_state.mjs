@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// 控制台状态构造器 —— 把平台资产编译成 console/state.json（控制台唯一数据源）。
-// 迭代 006 起：状态含迭代详情/施工包/MCP 工具/认知↔规律交叉引用（P10 可观测一等）。
+// 控制台状态构造器 —— 把平台资产（工单/智能体/迭代/施工包/MCP 工具）编译成 console/state.json。
+// 控制台动态功能（对话/任务）走 /api/*；本文件提供静态快照兜底与总览数据。
 
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -15,37 +15,36 @@ const orders = readdirSync(join(ROOT, 'platform/orders'))
   .map((f) => JSON.parse(read(join('platform/orders', f))))
   .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-// ---- 知识条目
-const knowledge = readdirSync(join(ROOT, 'knowledge'))
-  .filter((f) => f.endsWith('.json'))
-  .map((f) => JSON.parse(read(join('knowledge', f))))
-  .sort((a, b) => a.id.localeCompare(b.id));
+// ---- 智能体与角色
+const agents = existsSync(join(ROOT, 'platform/agents.json'))
+  ? JSON.parse(read('platform/agents.json')).agents
+  : [];
+const roles = readdirSync(join(ROOT, 'platform/roles')).filter((f) => f.endsWith('.md')).map((f) => {
+  const t = read(join('platform/roles', f));
+  const h = (t.match(/^# 角色 · (.+)$/m) || [])[1] || f;
+  return { id: f.replace(/\.md$/, ''), name: h.trim() };
+});
 
-// ---- 设计规律（依据列可含多条 K- 引用）
+// ---- 设计原则（LAWS.md 表格：| 编号 | 名称 | 原则 | 落地位置 |）
 const laws = (read('LAWS.md').match(/^\| P\d+ \|.+$/gm) || [])
   .map((row) => {
     const cols = row.split('|').map((s) => s.trim()).filter((s) => s.length);
-    const [id, name, law, where, evidence] = cols;
-    const kids = row.match(/K-\d+/g) || [];
-    return { id, name, law, where, evidence, kids };
+    const [id, name, law, where] = cols;
+    return { id, name, law, where };
   });
 
-// ---- 迭代账本（详情化：目标 + 遗留线索）
-const iterText = read('docs/ITERATIONS.md');
-const blocks = iterText.split(/\n---\n/).filter((b) => b.includes('## 迭代'));
+// ---- 迭代账本（详情化）
+const blocks = read('docs/ITERATIONS.md').split(/\n---\n/).filter((b) => b.includes('## 迭代'));
 const iterations = blocks.map((block) => {
   const head = block.match(/^## 迭代 (\d+) · (.+?)（(.+?)）$/m) || [];
   const pick = (label) => (block.match(new RegExp(`- \\*\\*${label}\\*\\*：(.+)`, 'm')) || [])[1] || '';
   return {
-    n: Number(head[1] || 0),
-    title: head[2] || '',
-    date: head[3] || '',
-    goal: pick('目标').slice(0, 160),
-    clue: pick('遗留线索').slice(0, 200),
+    n: Number(head[1] || 0), title: head[2] || '', date: head[3] || '',
+    goal: pick('目标').slice(0, 160), clue: pick('遗留线索').slice(0, 200),
   };
 }).filter((i) => i.n).sort((a, b) => a.n - b.n);
 
-// ---- 施工包 + 心跳
+// ---- 施工包与心跳
 const dispatchDir = join(ROOT, 'platform', 'dispatch');
 const dispatches = existsSync(dispatchDir)
   ? readdirSync(dispatchDir).filter((f) => f.endsWith('.json'))
@@ -55,56 +54,32 @@ const dispatches = existsSync(dispatchDir)
       })
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   : [];
-const ticks = existsSync(join(ROOT, 'platform', 'schedule.json'))
-  ? JSON.parse(read('platform/schedule.json'))
-  : [];
+const ticks = existsSync(join(ROOT, 'platform', 'schedule.json')) ? JSON.parse(read('platform/schedule.json')) : [];
 
-// ---- MCP 工具（从核心模块源码解析——能力即代码，P11 后 TOOLS 迁至 core.mjs）
-const serverSrc = read('platform/mcp/core.mjs');
-const toolsBlock = (serverSrc.match(/export const TOOLS = \[([\s\S]*?)\n\];/) || [])[1] || '';
+// ---- MCP 工具（从核心源码解析——能力即代码）
+const coreSrc = read('platform/mcp/core.mjs');
+const toolsBlock = (coreSrc.match(/export const TOOLS = \[([\s\S]*?)\n\];/) || [])[1] || '';
 const mcpTools = [...toolsBlock.matchAll(/name:\s*'([a-z_]+)',\s*description:\s*'([^']+)'/g)]
   .map((m) => ({ name: m[1], description: m[2] }));
-
-// ---- 智能体注册表 + 角色契约（P12）
-const agents = existsSync(join(ROOT, 'platform', 'agents.json'))
-  ? JSON.parse(read('platform/agents.json')).agents
-  : [];
-const roles = readdirSync(join(ROOT, 'platform/roles')).filter((f) => f.endsWith('.md')).map((f) => {
-  const t = read(join('platform/roles', f));
-  const h = (t.match(/^# 角色 · (.+)$/m) || [])[1] || f;
-  return { id: f.replace(/\.md$/, ''), name: h.trim() };
-});
-
-// ---- 认知 ↔ 规律交叉引用
-const crossRefs = {};
-for (const k of knowledge) {
-  crossRefs[k.id] = laws.filter((l) => l.kids.includes(k.id)).map((l) => l.id);
-}
-
-const topics = [...new Set(knowledge.map((k) => k.topic))].map((t) => ({ topic: t, count: knowledge.filter((k) => k.topic === t).length }));
 
 const state = {
   generatedAt: new Date().toISOString(),
   counts: {
     orders: orders.length,
     ordersOpen: orders.filter((o) => o.status === 'open').length,
-    knowledge: knowledge.length,
+    agents: agents.length,
     laws: laws.length,
     iterations: iterations.length,
     dispatches: dispatches.length,
     mcpTools: mcpTools.length,
   },
   orders,
-  knowledge,
+  agents,
+  roles,
   laws,
   iterations,
   dispatches,
-  ticks,
   mcpTools,
-  agents,
-  roles,
-  crossRefs,
-  topics,
 };
 
 if (existsSync(join(ROOT, 'platform', 'schedule.json'))) {
@@ -117,4 +92,4 @@ if (existsSync(join(ROOT, 'platform', 'schedule.json'))) {
 }
 
 writeFileSync(join(ROOT, 'console', 'state.json'), JSON.stringify(state, null, 2));
-console.log(`console/state.json: ${orders.length} 工单 · ${knowledge.length} 知识 · ${laws.length} 规律 · ${iterations.length} 迭代 · ${dispatches.length} 施工包 · ${mcpTools.length} MCP 工具`);
+console.log(`console/state.json: ${orders.length} 工单 · ${agents.length} 智能体 · ${laws.length} 原则 · ${iterations.length} 迭代 · ${dispatches.length} 施工包 · ${mcpTools.length} MCP 工具`);

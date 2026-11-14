@@ -57,7 +57,7 @@ try {
 
   const tools = await call('tools/list', {});
   const names = tools.tools.map((t) => t.name);
-  const want = ['list_orders', 'read_order', 'platform_state', 'list_knowledge', 'run_gates', 'write_ledger', 'close_order'];
+  const want = ['list_orders', 'read_order', 'platform_state', 'list_tasks', 'create_task', 'set_task_status', 'list_agents', 'register_agent', 'run_gates', 'write_ledger', 'close_order', 'dispatch_next'];
   check('tools/list 完整', want.every((w) => names.includes(w)), names.join(', '));
 
   const orders = await call('tools/call', { name: 'list_orders', arguments: {} });
@@ -65,21 +65,20 @@ try {
   check('list_orders 返回工单', Array.isArray(list) && list.length >= 6, `${list.length} 张`);
 
   const state = JSON.parse((await call('tools/call', { name: 'platform_state', arguments: {} })).content[0].text);
-  check('platform_state 知识库>=8', state.platform.knowledge >= 8, `${state.platform.knowledge} 知识 / ${state.platform.laws} 律 / ${state.platform.iterations} 轮迭代`);
+  check('platform_state 平台计数', state.platform.laws >= 10 && state.platform.iterations >= 7, `${state.platform.laws} 原则 / ${state.platform.iterations} 轮迭代`);
   check('platform_state 下一张工单', !!state.nextByPriority?.id, state.nextByPriority?.id);
 
-  const kn = JSON.parse((await call('tools/call', { name: 'list_knowledge', arguments: {} })).content[0].text);
-  const allTraced = kn.every((k) => Array.isArray(k.sources) && k.sources.length && k.appliedTo);
-  check('list_knowledge 全部可溯源', kn.length >= 8 && allTraced, `${kn.length} 条`);
-
-  const one = JSON.parse((await call('tools/call', { name: 'read_order', arguments: { id: 'ORD-012' } })).content[0].text);
-  check('read_order 读全文', one.id === 'ORD-012' && Array.isArray(one.acceptance), one.title);
-
-  const disp = JSON.parse((await call('tools/call', { name: 'dispatch_next', arguments: { dry: true } })).content[0].text);
-  check('dispatch_next 观测模式', typeof disp.dispatched === 'boolean', disp.dispatched ? `将派 ${disp.orderId}` : disp.reason);
+  const tasks = JSON.parse((await call('tools/call', { name: 'list_tasks', arguments: {} })).content[0].text);
+  check('list_tasks 任务看板', Array.isArray(tasks), `${tasks.length} 条任务`);
 
   const agents = JSON.parse((await call('tools/call', { name: 'list_agents', arguments: {} })).content[0].text);
   check('list_agents 注册表', Array.isArray(agents) && agents.length >= 4, `${agents.length} 个智能体`);
+
+  const one = JSON.parse((await call('tools/call', { name: 'read_order', arguments: { id: 'ORD-019' } })).content[0].text);
+  check('read_order 读全文', one.id === 'ORD-019' && Array.isArray(one.acceptance), one.title);
+
+  const disp = JSON.parse((await call('tools/call', { name: 'dispatch_next', arguments: { dry: true } })).content[0].text);
+  check('dispatch_next 观测模式', typeof disp.dispatched === 'boolean', disp.dispatched ? `将派 ${disp.orderId}` : disp.reason);
 
   const badReg = await call('tools/call', { name: 'register_agent', arguments: { id: 'x-01', name: 'x', role: 'explorer', tools: ['不存在的工具'] } });
   check('register_agent 校验拦截', badReg.isError === true, '未知工具被拒');

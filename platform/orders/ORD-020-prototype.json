@@ -1,0 +1,38 @@
+{
+  "id": "ORD-020",
+  "title": "平台雏形：对话与任务指挥（生产力核心）",
+  "status": "claimed",
+  "auto": false,
+  "priority": 25,
+  "scores": {
+    "impact": 5,
+    "data": 5,
+    "law": 4,
+    "drama": 5
+  },
+  "goal": "让平台成为生产力工具：人类在控制台上与智能体聊天（LLM 由 OpenAI 兼容端点承载，厂商中立）、创建任务并指挥智能体干活（任务看板 + 状态流转 + MCP 任务工具）",
+  "leads": [
+    {
+      "source": "OpenAI 兼容 /chat/completions 端点（Ollama/vLLM/LM Studio/各云厂商的de-facto标准）",
+      "url": "https://platform.openai.com/docs/api-reference/chat",
+      "license": "参考接口形状"
+    },
+    {
+      "source": "本机 Ollama（127.0.0.1:11434，qwen2.5vl:3b）",
+      "url": "https://ollama.com",
+      "license": "MIT"
+    }
+  ],
+  "lawDraft": "P12 续：平台是编排层——对话与任务经标准接口交给外部模型/agent，平台不绑定供应商",
+  "acceptance": [
+    "后端 API：POST /api/chat（会话存储+LLM 代理，未配置时返回引导）、任务看板 CRUD /api/tasks",
+    "MCP 任务工具：list_tasks / create_task / set_task_status（agent 可经 MCP 领活）",
+    "控制台：对话页（选智能体→聊天）+ 任务看板页（创建/流转），移除知识考察页",
+    "k8s 部署后浏览器实测：创建任务、与智能体真实对话（本机 Ollama qwen2.5vl:3b）",
+    "AGENTS.md 迭代原则定稿；verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": "zcode(bigmodel) · 迭代 009",
+  "claimedAt": "2026-11-14T05:40:00Z",
+  "deliveredIn": null,
+  "notes": "由迭代 009 施工（用户指令：搭项目雏形 + 规定迭代原则，后续由其他 coding agent 迭代）。"
+}

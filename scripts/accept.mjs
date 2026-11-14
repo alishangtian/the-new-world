@@ -5,7 +5,7 @@
 // 输出 ACCEPTANCE: PASS / FAIL。exit 0 = PASS。
 
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -60,22 +60,21 @@ let g2 = run('G2 平台体检', () => sh('node', ['scripts/verify.mjs']).split('
 // ---------------------------------------------------------------- G3 平台自检
 let g3 = run('G3 平台自检 (MCP 冒烟)', () => sh('node', ['platform/mcp/smoke.mjs']).split('\n').filter((l) => l.trim()).pop());
 
-// ---------------------------------------------------------------- G4 知识纪律
-let g4 = run('G4 知识纪律', () => {
-  const dir = join(ROOT, 'knowledge');
-  const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
+// ---------------------------------------------------------------- G4 资产纪律
+let g4 = run('G4 资产纪律', () => {
   const bad = [];
-  for (const f of files) {
-    const doc = JSON.parse(readFileSync(join(dir, f), 'utf8'));
-    const srcs = doc && doc.sources;
-    if (!Array.isArray(srcs) || !srcs.length) bad.push(`${f}: 缺 sources`);
-    else for (const s of srcs) if (!/^https?:\/\//.test(s.url || '')) bad.push(`${f}: 来源 URL 非法`);
-    if (!doc.appliedTo) bad.push(`${f}: 缺 appliedTo（知识必须落到平台）`);
+  const statePath = join(ROOT, 'console/state.json');
+  if (!existsSync(statePath)) bad.push('console/state.json 不存在');
+  else {
+    const st = JSON.parse(readFileSync(statePath, 'utf8'));
+    if (!st.counts || st.counts.agents == null) bad.push('state.counts 缺 agents 计数');
   }
-  const state = statSync(join(ROOT, 'console/state.json'));
-  if (Date.now() - state.mtimeMs > 7 * 86400000) bad.push('console/state.json 超过 7 天未重建');
+  for (const f of ['AGENTS.md', 'LAWS.md', 'docs/ITERATIONS.md', 'BACKLOG.md']) {
+    const p = join(ROOT, f);
+    if (!existsSync(p) || readFileSync(p, 'utf8').trim().length < 100) bad.push(`${f} 缺失或空`);
+  }
   if (bad.length) throw new Error(bad.join('; '));
-  return `${files.length} 条知识全部可溯源且标注应用位置`;
+  return '控制台状态/四份原则文件齐全合法';
 });
 
 // ---------------------------------------------------------------- G5 账本纪律

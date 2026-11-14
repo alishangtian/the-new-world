@@ -180,3 +180,26 @@
   实时注册 → 注册表即时出现第五行；运行时构建经账本固化入仓库注册表。
 - **提交**：见 git log。
 - **遗留线索**：agent 状态流转（idle→working）与心跳联动；注册表接入 A2A agent card（ORD-015）。
+
+---
+
+## 迭代 009 · 平台雏形：对话与任务指挥（2026-11-14）
+
+- **目标**：方向纠正落地——平台是生产力工具：人类在控制台上与智能体聊天、下达任务指挥干活。搭建项目雏形，规定迭代原则，后续由其他 coding agent 迭代。
+- **认知来源**：OpenAI 兼容 /chat/completions 接口形状（Ollama/vLLM/LM Studio/云厂商的事实标准）；本机 Ollama（qwen2.5vl:3b）实测。
+- **产物**：
+  - 后端：任务看板 API（GET/POST /api/tasks、状态流转）+ 对话 API（POST /api/chat，
+    LLM 缝隙 = OpenAI 兼容端点 env 注入，未配置返回接入指引；会话存 platform/data/）
+  - MCP 任务工具：list_tasks / create_task / set_task_status（agent 可经 MCP 领活）
+  - 控制台重写：新增「对话」页（选智能体→真实聊天）与「任务」页（看板下达/流转）；
+    移除知识库/溯源链页（方向纠正）
+  - 迭代原则：新增仓库根 AGENTS.md（八条原则 + 六步流程 + 结构地图，coding agent 法定入口）；
+    LAWS 重写为 P1–P12 平台设计原则（去考察框架）；PROTOCOL/SKILL 精简
+  - k8s Deployment 注入 LLM env（host.docker.internal:11434 + qwen2.5vl:3b）
+- **新规律**：LAWS 重写为平台设计原则（P1–P12）。
+- **验收证据**：accept 五门全 PASS；本机 Ollama 真实对话实测（考察员以契约身份回答 llmUsed=true）；
+  任务创建/列表/流转实测；浏览器演示对话页与任务看板。
+- **提交**：见 git log。
+- **遗留线索**：会话持久化（k8s PVC）；agent 执行循环（LLM 自动调 MCP 工具，演示中小模型出现
+  数字幻觉——工具循环是解药）；任务完成通知；本机 Docker Desktop 镜像服务故障（构建挂起，
+  已用"Node Pod + exec 常驻"旁路运行，正式镜像化部署待 Docker 修复后执行 docker build + set image）。

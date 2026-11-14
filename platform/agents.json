@@ -15,7 +15,7 @@
       "tools": [
         "list_orders",
         "read_order",
-        "list_knowledge",
+        "list_tasks",
         "platform_state"
       ],
       "permissions": {
@@ -47,7 +47,7 @@
         "list_orders",
         "read_order",
         "platform_state",
-        "list_knowledge",
+        "list_tasks",
         "run_gates"
       ],
       "permissions": {

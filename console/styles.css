@@ -270,6 +270,72 @@ tr.sel { background: rgba(110, 231, 255, 0.07); }
 .toolpick:has(input:checked) { color: var(--accent); border-color: rgba(110, 231, 255, 0.5); }
 #ag-list table { font-size: 12.5px; }
 
+/* 迭代 009 · 对话与任务 */
+.chat-layout { display: grid; grid-template-columns: 240px 1fr; gap: 14px; align-items: start; }
+.chat-agents .agent-row {
+  padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  border: 1px solid transparent; margin-bottom: 4px;
+}
+.chat-agents .agent-row:hover { background: rgba(148, 180, 255, 0.08); }
+.chat-agents .agent-row.sel { border-color: rgba(110, 231, 255, 0.45); background: rgba(110, 231, 255, 0.08); }
+.chat-agents .agent-row b { font-size: 13px; }
+.chat-main { display: flex; flex-direction: column; min-height: 420px; }
+.chat-msgs {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 4px;
+}
+.msg { display: flex; }
+.msg.user { justify-content: flex-end; }
+.msg .bubble {
+  max-width: 78%;
+  padding: 9px 13px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.msg.user .bubble { background: rgba(110, 231, 255, 0.16); border: 1px solid rgba(110, 231, 255, 0.3); }
+.msg.assistant .bubble { background: rgba(148, 180, 255, 0.1); border: 1px solid var(--border); }
+.chat-input { display: flex; gap: 8px; margin-top: 12px; }
+.chat-input input {
+  flex: 1;
+  background: rgba(148, 180, 255, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  padding: 10px 14px;
+  outline: none;
+}
+.chat-input input:focus { border-color: rgba(110, 231, 255, 0.45); }
+
+.task-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.task-form input, .task-form select {
+  background: rgba(148, 180, 255, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 12.5px;
+  padding: 8px 10px;
+  outline: none;
+}
+.task-form input { flex: 1; min-width: 160px; }
+.task-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) { .chat-layout { grid-template-columns: 1fr; } }
 @media (max-width: 760px) {
   .top { flex-direction: column; align-items: stretch; }
   #app { padding: 14px 14px 20px; }
