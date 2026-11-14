@@ -1,0 +1,16 @@
+{
+  "name": "the-new-world",
+  "version": "0.1.0",
+  "description": "新世界 —— 用代码堆砌的现实：以真实数据为砖、简洁规律为梁、浏览器交互为窗的可持续世界构建仓库",
+  "type": "module",
+  "scripts": {
+    "fetch": "python3 scripts/fetch_data.py",
+    "verify": "node scripts/verify.mjs",
+    "serve": "python3 -m http.server 8000"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alishangtian/the-new-world.git"
+  }
+}

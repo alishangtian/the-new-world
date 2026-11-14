@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="新世界 —— 用代码堆砌的现实。每块砖都来自真实数据：Natural Earth 边界、世界银行人口与经济、OWID 碳排放。">
+<title>新世界 · The New World</title>
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<canvas id="world"></canvas>
+
+<header class="brand">
+  <h1>新世界 <span>The New World</span></h1>
+  <p>用代码堆砌的现实 · 每一块砖都可溯源</p>
+</header>
+
+<button id="panel-toggle" title="知识砖块">☰</button>
+<aside id="panel" class="glass"></aside>
+
+<div id="hud" class="glass"></div>
+<div id="timeline" class="glass"></div>
+<div id="tooltip" class="hidden"></div>
+<div id="card" class="glass hidden"></div>
+
+<div id="loader"><div class="spin"></div><p>正在搬运现实……</p></div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
