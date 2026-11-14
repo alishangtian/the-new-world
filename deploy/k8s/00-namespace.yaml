@@ -1,0 +1,7 @@
+# the-new-world · 独立命名空间（整体可清理，不污染集群其他工作负载）
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: the-new-world
+  labels:
+    app.kubernetes.io/part-of: the-new-world

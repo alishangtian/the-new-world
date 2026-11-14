@@ -1,15 +1,54 @@
 {
-  "generatedAt": "2026-11-14T06:16:06.583Z",
+  "generatedAt": "2026-11-14T06:30:46.428Z",
   "counts": {
-    "orders": 7,
+    "orders": 8,
     "ordersOpen": 4,
-    "knowledge": 10,
-    "laws": 10,
-    "iterations": 6,
+    "knowledge": 11,
+    "laws": 11,
+    "iterations": 7,
     "dispatches": 1,
     "mcpTools": 8
   },
   "orders": [
+    {
+      "id": "ORD-019",
+      "title": "平台容器化：MCP 双传输 + k8s 部署清单",
+      "status": "delivered",
+      "auto": false,
+      "priority": 20,
+      "scores": {
+        "impact": 5,
+        "data": 4,
+        "law": 4,
+        "drama": 5
+      },
+      "goal": "把平台（控制台 + MCP 服务）打包为容器部署到本机 k8s：MCP 核心与传输解耦（stdio/HTTP 双传输），HTTP 端点让任何 agent 平台经网络调用平台工具",
+      "leads": [
+        {
+          "source": "MCP Transports 规范（Streamable HTTP：POST 单条 JSON-RPC → application/json 单响应合规）",
+          "url": "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports",
+          "license": "开放规范"
+        },
+        {
+          "source": "MCP 2026-07-28：web 原生架构方向（K-001）",
+          "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28",
+          "license": "开放规范"
+        }
+      ],
+      "lawDraft": "P11 候选（K-001）：平台核心与传输解耦——同一工具核心，stdio 服务本地 agent，HTTP 服务网络 agent；k8s 只是无状态 HTTP 服务的宿主",
+      "acceptance": [
+        "MCP 核心抽离为 core 模块，stdio 版回归（smoke 全过）",
+        "HTTP 传输：GET /healthz、GET /（控制台静态）、POST /mcp（initialize/tools.list/tools.call）",
+        "Dockerfile（零依赖，node 基础镜像）+ k8s 清单（Namespace/Deployment 带探针/Service）",
+        "本机 k3d 集群真实部署：Pod Running、集群内 curl 控制台与 MCP 端点成功、浏览器可见",
+        "verify/accept 全绿；账本登记"
+      ],
+      "claimedBy": "zcode(bigmodel) · 迭代 007",
+      "claimedAt": "2026-11-14T05:20:00Z",
+      "deliveredIn": "007",
+      "notes": "由迭代 007 施工（用户指令：在本机 k8s 部署，看迭代出的 agent 工程效果）。目标集群：k3d-proteus-sandbox，独立 namespace the-new-world，可整体清理。",
+      "acceptedAt": "2026-11-14"
+    },
     {
       "id": "ORD-018",
       "title": "控制台富功能化：溯源链/时间线/施工包视图/交叉筛选",
@@ -424,6 +463,20 @@
       ],
       "insight": "2026 年 agent 可观测性平台（LangSmith/AgentOps/Langfuse/Phoenix…）的功能公约数：会话与步骤级的 trace 时间线、span 检查与回放、评估回归挂载、成本/异常追踪——'看得见的施工过程'本身就是平台能力，头部平台已用 AI 自动检测 trace 中的问题。控制台不是报表，是施工链路的回放器。",
       "appliedTo": "平台控制台（index.html + console/）按此范式升级：迭代时间线、施工包（runbook）视图、认知→规律→落地的溯源链、状态筛选与交叉跳转——把 P4 可追溯与 P5 显式状态机变成人类可回放的页面能力。"
+    },
+    {
+      "id": "K-011",
+      "date": "2026-11-14",
+      "topic": "协议互操作",
+      "title": "MCP Streamable HTTP：POST 单条 JSON-RPC，application/json 单响应即合规",
+      "sources": [
+        {
+          "title": "MCP 规范 · Transports（2025-03-26）",
+          "url": "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports"
+        }
+      ],
+      "insight": "Streamable HTTP 传输下，客户端向单一 /mcp 端点 POST 一条 JSON-RPC 消息；服务器可回 application/json（单响应）或 SSE 流，二者皆合规；纯通知回 202。这意味着零依赖服务器无需 SDK 即可实现标准 MCP HTTP 端点——传输只是核心之上的薄壳。",
+      "appliedTo": "platform/mcp/core.mjs（工具核心抽离）+ platform/mcp/http.mjs（HTTP 传输壳：静态控制台 + POST /mcp）——同一核心服务 stdio（本地 agent）与 HTTP（网络 agent/k8s）两种形态。"
     }
   ],
   "laws": [
@@ -527,6 +580,17 @@
       "kids": [
         "K-010"
       ]
+    },
+    {
+      "id": "P11",
+      "name": "核心与传输解耦",
+      "law": "平台工具核心不感知传输方式：stdio 服务本地 agent，HTTP（Streamable）服务网络 agent 与 k8s——同一核心，两种壳",
+      "where": "`platform/mcp/core.mjs` · `server.mjs` · `http.mjs` · `deploy/k8s/`",
+      "evidence": "K-001 · K-011",
+      "kids": [
+        "K-001",
+        "K-011"
+      ]
     }
   ],
   "iterations": [
@@ -571,6 +635,13 @@
       "date": "2026-11-14",
       "goal": "按 P10 可观测一等，把平台自身的\"认知→规律→施工→交付\"链路做成可交互的页面能力。",
       "clue": "控制台可加\"验收门实时状态\"（接入 run_gates）；light 主题；工单页内直接领单按钮。"
+    },
+    {
+      "n": 7,
+      "title": "平台容器化与本机 k8s 部署",
+      "date": "2026-11-14",
+      "goal": "把平台（控制台 + MCP 服务）打包为容器，部署到本机 k3d 集群；MCP 走 HTTP 传输，任何 agent 平台可经网络调用平台工具。",
+      "clue": "Ingress 暴露（替代 port-forward）；HPA 多副本（P9 心跳频率联动）；镜像 tag 与"
     }
   ],
   "dispatches": [
@@ -642,7 +713,8 @@
   ],
   "crossRefs": {
     "K-001": [
-      "P1"
+      "P1",
+      "P11"
     ],
     "K-002": [
       "P2"
@@ -671,12 +743,15 @@
     ],
     "K-010": [
       "P10"
+    ],
+    "K-011": [
+      "P11"
     ]
   },
   "topics": [
     {
       "topic": "协议互操作",
-      "count": 2
+      "count": 3
     },
     {
       "topic": "agent 工程",

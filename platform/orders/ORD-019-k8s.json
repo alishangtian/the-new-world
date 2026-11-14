@@ -1,0 +1,39 @@
+{
+  "id": "ORD-019",
+  "title": "平台容器化：MCP 双传输 + k8s 部署清单",
+  "status": "delivered",
+  "auto": false,
+  "priority": 20,
+  "scores": {
+    "impact": 5,
+    "data": 4,
+    "law": 4,
+    "drama": 5
+  },
+  "goal": "把平台（控制台 + MCP 服务）打包为容器部署到本机 k8s：MCP 核心与传输解耦（stdio/HTTP 双传输），HTTP 端点让任何 agent 平台经网络调用平台工具",
+  "leads": [
+    {
+      "source": "MCP Transports 规范（Streamable HTTP：POST 单条 JSON-RPC → application/json 单响应合规）",
+      "url": "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports",
+      "license": "开放规范"
+    },
+    {
+      "source": "MCP 2026-07-28：web 原生架构方向（K-001）",
+      "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28",
+      "license": "开放规范"
+    }
+  ],
+  "lawDraft": "P11 候选（K-001）：平台核心与传输解耦——同一工具核心，stdio 服务本地 agent，HTTP 服务网络 agent；k8s 只是无状态 HTTP 服务的宿主",
+  "acceptance": [
+    "MCP 核心抽离为 core 模块，stdio 版回归（smoke 全过）",
+    "HTTP 传输：GET /healthz、GET /（控制台静态）、POST /mcp（initialize/tools.list/tools.call）",
+    "Dockerfile（零依赖，node 基础镜像）+ k8s 清单（Namespace/Deployment 带探针/Service）",
+    "本机 k3d 集群真实部署：Pod Running、集群内 curl 控制台与 MCP 端点成功、浏览器可见",
+    "verify/accept 全绿；账本登记"
+  ],
+  "claimedBy": "zcode(bigmodel) · 迭代 007",
+  "claimedAt": "2026-11-14T05:20:00Z",
+  "deliveredIn": "007",
+  "notes": "由迭代 007 施工（用户指令：在本机 k8s 部署，看迭代出的 agent 工程效果）。目标集群：k3d-proteus-sandbox，独立 namespace the-new-world，可整体清理。",
+  "acceptedAt": "2026-11-14"
+}

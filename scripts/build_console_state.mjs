@@ -59,9 +59,9 @@ const ticks = existsSync(join(ROOT, 'platform', 'schedule.json'))
   ? JSON.parse(read('platform/schedule.json'))
   : [];
 
-// ---- MCP 工具（从服务器源码解析——能力即代码）
-const serverSrc = read('platform/mcp/server.mjs');
-const toolsBlock = (serverSrc.match(/const TOOLS = \[([\s\S]*?)\n\];/) || [])[1] || '';
+// ---- MCP 工具（从核心模块源码解析——能力即代码，P11 后 TOOLS 迁至 core.mjs）
+const serverSrc = read('platform/mcp/core.mjs');
+const toolsBlock = (serverSrc.match(/export const TOOLS = \[([\s\S]*?)\n\];/) || [])[1] || '';
 const mcpTools = [...toolsBlock.matchAll(/name:\s*'([a-z_]+)',\s*description:\s*'([^']+)'/g)]
   .map((m) => ({ name: m[1], description: m[2] }));
 

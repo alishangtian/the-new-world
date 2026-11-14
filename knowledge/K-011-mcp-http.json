@@ -1,0 +1,11 @@
+{
+  "id": "K-011",
+  "date": "2026-11-14",
+  "topic": "协议互操作",
+  "title": "MCP Streamable HTTP：POST 单条 JSON-RPC，application/json 单响应即合规",
+  "sources": [
+    { "title": "MCP 规范 · Transports（2025-03-26）", "url": "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports" }
+  ],
+  "insight": "Streamable HTTP 传输下，客户端向单一 /mcp 端点 POST 一条 JSON-RPC 消息；服务器可回 application/json（单响应）或 SSE 流，二者皆合规；纯通知回 202。这意味着零依赖服务器无需 SDK 即可实现标准 MCP HTTP 端点——传输只是核心之上的薄壳。",
+  "appliedTo": "platform/mcp/core.mjs（工具核心抽离）+ platform/mcp/http.mjs（HTTP 传输壳：静态控制台 + POST /mcp）——同一核心服务 stdio（本地 agent）与 HTTP（网络 agent/k8s）两种形态。"
+}

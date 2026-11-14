@@ -140,3 +140,24 @@
   chips、工单筛选+施工包、迭代时间线），探针确认路由/筛选/交叉跳转行为正确。
 - **提交**：见 git log。
 - **遗留线索**：控制台可加"验收门实时状态"（接入 run_gates）；light 主题；工单页内直接领单按钮。
+
+---
+
+## 迭代 007 · 平台容器化与本机 k8s 部署（2026-11-14）
+
+- **目标**：把平台（控制台 + MCP 服务）打包为容器，部署到本机 k3d 集群；MCP 走 HTTP 传输，任何 agent 平台可经网络调用平台工具。
+- **认知来源**：K-011（MCP Streamable HTTP：POST 单条 JSON-RPC → application/json 单响应即合规——modelcontextprotocol.io/specification/2025-03-26/basic/transports）+ K-001（web 原生方向）。
+- **产物**：
+  - `platform/mcp/core.mjs`：工具核心从 stdio 壳中抽离（P11 立法落地）
+  - `platform/mcp/server.mjs`：薄壳化（stdio，本地 agent），回归冒烟 PASS
+  - `platform/mcp/http.mjs`：HTTP 传输壳（GET / 控制台 · GET /healthz · POST /mcp）
+  - `Dockerfile` + `.dockerignore`（node:24-alpine，零依赖纯 JS）
+  - `deploy/k8s/`：Namespace / Deployment（readiness+liveness /healthz、资源限额）/ Service(ClusterIP) / README（含清理命令）
+  - 本机 k3d 集群真实部署：namespace=the-new-world，Pod 1/1 Running
+- **新规律**：P11 核心与传输解耦（LAWS.md，依据 K-001 · K-011）。
+- **验收证据**：stdio 冒烟回归 PASS（薄壳不改行为）；集群内探针 Pod 经 Service DNS 调用
+  /healthz 与 POST /mcp（tools/call platform_state）返回完整平台状态；本机 port-forward 8081
+  三通道验证（控制台 200 / healthz / MCP list_knowledge）；浏览器确认 k8s 控制台渲染正常。
+- **提交**：见 git log。
+- **遗留线索**：Ingress 暴露（替代 port-forward）；HPA 多副本（P9 心跳频率联动）；镜像 tag 与
+  账本迭代号联动发布。

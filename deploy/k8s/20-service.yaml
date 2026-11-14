@@ -1,0 +1,17 @@
+# 集群内访问：http://the-new-world.the-new-world.svc:80
+# 本机访问：kubectl -n the-new-world port-forward svc/the-new-world 8081:80
+apiVersion: v1
+kind: Service
+metadata:
+  name: the-new-world
+  namespace: the-new-world
+  labels:
+    app.kubernetes.io/name: the-new-world
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: the-new-world
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
