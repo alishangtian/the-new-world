@@ -17,6 +17,7 @@
 | P9 | 自主触发 | 持续构建 = 心跳（定时触发）+ 确定性派单（只派 auto-ok 工单）+ 断点续跑（账本唯一迭代号）；心跳只发令，需要认知与代码的施工交给接入的 agent | `platform/scheduler.mjs` · `.github/workflows/tick.yml` | K-005 · K-009 |
 | P10 | 可观测一等 | 施工链路（考察→施工→交付）必须人类可回放：trace 时间线、span 检查、溯源链是控制台的一等能力，不是报表 | `console/` · `scripts/build_console_state.mjs` | K-010 |
 | P11 | 核心与传输解耦 | 平台工具核心不感知传输方式：stdio 服务本地 agent，HTTP（Streamable）服务网络 agent 与 k8s——同一核心，两种壳 | `platform/mcp/core.mjs` · `server.mjs` · `http.mjs` · `deploy/k8s/` | K-001 · K-011 |
+| P12 | 身份即清单 | agent 的身份 = 机读清单（能力/工具/权限边界），可注册、可审计；权限必须显式写 forbidden | `platform/agents.json` · MCP `list_agents`/`register_agent` | K-004 · K-006 |
 
 ## 提炼纪律
 

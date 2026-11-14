@@ -65,6 +65,16 @@ const toolsBlock = (serverSrc.match(/export const TOOLS = \[([\s\S]*?)\n\];/) ||
 const mcpTools = [...toolsBlock.matchAll(/name:\s*'([a-z_]+)',\s*description:\s*'([^']+)'/g)]
   .map((m) => ({ name: m[1], description: m[2] }));
 
+// ---- 智能体注册表 + 角色契约（P12）
+const agents = existsSync(join(ROOT, 'platform', 'agents.json'))
+  ? JSON.parse(read('platform/agents.json')).agents
+  : [];
+const roles = readdirSync(join(ROOT, 'platform/roles')).filter((f) => f.endsWith('.md')).map((f) => {
+  const t = read(join('platform/roles', f));
+  const h = (t.match(/^# 角色 · (.+)$/m) || [])[1] || f;
+  return { id: f.replace(/\.md$/, ''), name: h.trim() };
+});
+
 // ---- 认知 ↔ 规律交叉引用
 const crossRefs = {};
 for (const k of knowledge) {
@@ -91,6 +101,8 @@ const state = {
   dispatches,
   ticks,
   mcpTools,
+  agents,
+  roles,
   crossRefs,
   topics,
 };

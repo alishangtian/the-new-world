@@ -4,6 +4,7 @@
 // 原则：平台的每一次升级，都必须能通过这里的一次体检。
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { existsSync as _exists } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -80,6 +81,33 @@ for (const row of lawRows) {
 if (cited === lawRows.length && cited >= 5) ok(`${cited} 条设计规律全部有考察条目支撑`);
 const orphanK = knowledge.filter((k) => !lawsText.includes(k.id));
 if (orphanK.length) console.log(`  · 提示：${orphanK.length} 条知识尚未被规律引用（合法——知识可以先于规律存在）`);
+
+// ---------------------------------------------------------------- 智能体注册表
+console.log('[2.5/4] 智能体注册表（P12 身份即清单）');
+try {
+  const reg = loadJson('platform/agents.json');
+  const { TOOLS } = await import(join(ROOT, 'platform/mcp/core.mjs'));
+  const toolNames = new Set(TOOLS.map((t) => t.name));
+  const rolesDir = join(ROOT, 'platform/roles');
+  const ids = reg.agents.map((a) => a.id);
+  if (new Set(ids).size !== ids.length) fail('智能体 id 重复');
+  let roleOk = 0;
+  for (const a of reg.agents) {
+    if (!/^[a-z][a-z0-9-]{2,30}$/.test(a.id)) fail(`智能体 id 非法: ${a.id}`);
+    if (!/md$/.test(a.contract || '') && a.role !== 'custom') fail(`${a.id}: 缺契约文件`);
+    if (a.role !== 'custom') {
+      const cf = join(ROOT, a.contract || '');
+      if (!existsSync(cf)) fail(`${a.id}: 契约文件不存在 ${a.contract}`);
+      else roleOk++;
+    }
+    const bad = (a.tools || []).filter((t) => !toolNames.has(t));
+    if (bad.length) fail(`${a.id}: 授予了不存在的工具 ${bad.join(',')}`);
+    if (!a.permissions?.forbidden?.length) fail(`${a.id}: 缺 forbidden 权限边界（P12）`);
+  }
+  if (roleOk >= 4) ok(`注册表 ${reg.agents.length} 个智能体（${roleOk} 个带契约文件），工具白名单全部合法`);
+} catch (e) {
+  fail('注册表: ' + e.message.split('\n')[0]);
+}
 
 // ---------------------------------------------------------------- 调度纪律
 console.log('[3.5/4] 调度纪律（P9）');

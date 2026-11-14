@@ -92,6 +92,39 @@ const dispatchNext = ({ dry } = {}) => {
   try { return JSON.parse(r.stdout); } catch { return { raw: (r.stdout || r.stderr || '').trim() }; }
 };
 
+// ---------------------------------------------------------------- 智能体注册表（P12 身份即清单）
+const AGENTS = join(ROOT, 'platform', 'agents.json');
+const KNOWN_ROLES = new Set(['explorer', 'builder', 'auditor', 'chronicler', 'custom']);
+
+const loadRegistry = () => JSON.parse(readFileSync(AGENTS, 'utf8'));
+const listAgents = () => loadRegistry().agents
+  .map((a) => ({ id: a.id, name: a.name, role: a.role, tools: a.tools, status: a.status, lastContribution: a.lastContribution }));
+
+const registerAgent = ({ id, name, role, tools, note } = {}) => {
+  const toolNames = new Set(TOOLS.map((t) => t.name)); // 惰性求值：TOOLS 在本模块后段定义
+  if (!/^[a-z][a-z0-9-]{2,30}$/.test(id || '')) throw new Error(`id 非法（小写字母开头，3-31 位 [a-z0-9-]）: ${id}`);
+  if (!name || String(name).length > 40) throw new Error('需要 name（≤40 字符）');
+  if (!KNOWN_ROLES.has(role)) throw new Error(`未知角色 ${role}（可选：${[...KNOWN_ROLES].join('/')}）`);
+  const bad = (tools || []).filter((t) => !toolNames.has(t));
+  if (bad.length) throw new Error(`未知工具: ${bad.join(',')}`);
+  const reg = loadRegistry();
+  if (reg.agents.some((a) => a.id === id)) throw new Error(`id 已存在: ${id}`);
+  const contract = role !== 'custom' ? `platform/roles/${role}.md` : null;
+  reg.agents.push({
+    id, name, role,
+    contract: contract || null,
+    runtime: 'external',
+    transport: ['stdio', 'http'],
+    tools: tools || [],
+    permissions: { write: [], forbidden: ['scripts/accept.mjs', 'scripts/verify.mjs'] },
+    status: 'idle',
+    lastContribution: { iteration: null, note: note || '注册于运行时' },
+  });
+  reg.updatedAt = new Date().toISOString().slice(0, 10);
+  writeFileSync(AGENTS, JSON.stringify(reg, null, 2) + '\n');
+  return { registered: id, tools: tools || [], note: '容器内注册为运行时态；固化请走工单+提交' };
+};
+
 // ---------------------------------------------------------------- 工具清单
 export const TOOLS = [
   { name: 'list_orders', description: '列出平台工单（按优先级降序）。SELECT 步骤的起点：领一张 open 工单施工。',
@@ -115,6 +148,16 @@ export const TOOLS = [
       additionalProperties: false } },
   { name: 'dispatch_next', description: '调用平台调度器：回收超时认领、派发下一张 auto-ok 工单并生成施工包。dry=true 只观测不落盘。',
     inputSchema: { type: 'object', properties: { dry: { type: 'boolean', description: '观测模式（默认 false）' } }, additionalProperties: false } },
+  { name: 'list_agents', description: '列出注册的智能体（角色/工具/状态/最近贡献）——P12 身份即清单。',
+    inputSchema: { type: 'object', properties: {}, additionalProperties: false } },
+  { name: 'register_agent', description: '注册一个智能体到 platform/agents.json（校验 id/角色/工具白名单）。',
+    inputSchema: { type: 'object', required: ['id', 'name', 'role'],
+      properties: { id: { type: 'string', description: '小写 [a-z0-9-]，如 patrol-01' },
+                    name: { type: 'string', description: '展示名，如 巡逻员 · Patrol' },
+                    role: { type: 'string', enum: ['explorer', 'builder', 'auditor', 'chronicler', 'custom'] },
+                    tools: { type: 'array', items: { type: 'string' }, description: '授予的平台工具名（必须是已存在的 MCP 工具）' },
+                    note: { type: 'string' } },
+      additionalProperties: false } },
 ];
 
 const handlers = {
@@ -126,6 +169,8 @@ const handlers = {
   write_ledger: writeLedger,
   close_order: closeOrder,
   dispatch_next: dispatchNext,
+  list_agents: listAgents,
+  register_agent: registerAgent,
 };
 
 /**

@@ -251,6 +251,25 @@ tr.sel { background: rgba(110, 231, 255, 0.07); }
 .runbook { margin: 8px 0 0 18px; font-size: 12px; color: var(--muted); line-height: 1.9; }
 .runbook li::marker { color: var(--accent); }
 
+/* 迭代 008 · 智能体构建表单 */
+.form .frow { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.form .frow label { width: 72px; flex: none; font-size: 12px; color: var(--muted); }
+.form input[type='text'], .form input:not([type]), .form select {
+  flex: 1;
+  background: rgba(148, 180, 255, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+}
+.form input:focus, .form select:focus { border-color: rgba(110, 231, 255, 0.45); }
+.toolpick { cursor: pointer; user-select: none; }
+.toolpick input { accent-color: var(--accent); margin-right: 4px; }
+.toolpick:has(input:checked) { color: var(--accent); border-color: rgba(110, 231, 255, 0.5); }
+#ag-list table { font-size: 12.5px; }
+
 @media (max-width: 760px) {
   .top { flex-direction: column; align-items: stretch; }
   #app { padding: 14px 14px 20px; }

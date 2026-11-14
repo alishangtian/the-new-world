@@ -1,7 +1,7 @@
 {
   "id": "ORD-013",
   "title": "Agent 运行时注册表：agents.json 清单模式",
-  "status": "claimed",
+  "status": "delivered",
   "priority": 17,
   "scores": {
     "impact": 5,
@@ -28,9 +28,10 @@
     "四角色各有一条清单实例",
     "verify/accept 全绿；账本登记"
   ],
-  "claimedBy": "scheduler (auto)",
+  "claimedBy": "zcode(bigmodel) · 迭代 008（消费调度器施工包）",
   "claimedAt": "2026-11-14T04:25:03.620Z",
-  "deliveredIn": null,
-  "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。",
-  "auto": true
+  "deliveredIn": "008",
+  "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。\n[调度器 2026-11-14T04:25:03.620Z] 施工包 dispatch-006-ORD-013 已派发；迭代 008 由 zcode(bigmodel) 消费本包执行。",
+  "auto": true,
+  "acceptedAt": "2026-11-14"
 }

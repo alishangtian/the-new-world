@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-14",
+  "agents": [
+    {
+      "id": "explorer-01",
+      "name": "考察员 · Explorer",
+      "role": "explorer",
+      "contract": "platform/roles/explorer.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "list_orders",
+        "read_order",
+        "list_knowledge",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [
+          "knowledge/"
+        ],
+        "forbidden": [
+          "scripts/accept.mjs",
+          "LAWS.md 直接修订"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "004",
+        "note": "K-001…K-008 八条世界考察入库"
+      }
+    },
+    {
+      "id": "builder-01",
+      "name": "建造师 · Builder",
+      "role": "builder",
+      "contract": "platform/roles/builder.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "list_orders",
+        "read_order",
+        "platform_state",
+        "list_knowledge",
+        "run_gates"
+      ],
+      "permissions": {
+        "write": [
+          "platform/",
+          "console/",
+          "LAWS.md（按考察条目）"
+        ],
+        "forbidden": [
+          "scripts/accept.mjs",
+          "scripts/verify.mjs"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "007",
+        "note": "MCP 核心抽离 + HTTP 传输 + k8s 清单"
+      }
+    },
+    {
+      "id": "auditor-01",
+      "name": "质检员 · Auditor",
+      "role": "auditor",
+      "contract": "platform/roles/auditor.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "run_gates",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [],
+        "forbidden": [
+          "修改 accept.mjs / verify.mjs",
+          "替建造师修代码"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "007",
+        "note": "五门验收 PASS 判定"
+      }
+    },
+    {
+      "id": "chronicler-01",
+      "name": "史官 · Chronicler",
+      "role": "chronicler",
+      "contract": "platform/roles/chronicler.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "write_ledger",
+        "close_order",
+        "list_orders",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [
+          "docs/ITERATIONS.md（只追加）",
+          "BACKLOG.md",
+          "platform/orders/"
+        ],
+        "forbidden": [
+          "改写历史条目"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "007",
+        "note": "迭代 007 记账与推送"
+      }
+    },
+    {
+      "id": "patrol-01",
+      "name": "巡逻员 · Patrol",
+      "role": "custom",
+      "contract": null,
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "run_gates",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [],
+        "forbidden": [
+          "scripts/accept.mjs",
+          "scripts/verify.mjs"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "008",
+        "note": "控制台构建表单实时注册演示（k8s MCP HTTP）"
+      }
+    }
+  ]
+}

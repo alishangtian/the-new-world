@@ -4,7 +4,7 @@
 
 const app = document.getElementById('app');
 const foot = document.getElementById('foot-state');
-let state = await (await fetch('./console/state.json')).json();
+let state = await (await fetch('./console/state.json', { cache: 'no-store' })).json();
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const chip = (cls, text) => `<span class="chip ${cls}">${esc(text)}</span>`;
@@ -324,8 +324,100 @@ COMMIT  提交（迭代叙事）</pre>
     </div>`;
 }
 
+// ---------------------------------------------------------------- 智能体（P12）
+let agentLive = null; // null=未探测；true=HTTP MCP 可用；false=静态回退
+let agentsList = null;
+async function mcpCall(method, params) {
+  const r = await fetch('./mcp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method, params }) });
+  if (!r.ok) throw new Error(`MCP HTTP 不可达 (${r.status})`);
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message);
+  const callResult = j.result;
+  if (callResult?.isError) throw new Error(callResult.content?.[0]?.text || '工具执行失败');
+  return callResult.content[0].text;
+}
+async function getAgents() {
+  if (agentLive !== false) {
+    try {
+      agentsList = JSON.parse(await mcpCall('tools/call', { name: 'list_agents', arguments: {} }));
+      agentLive = true;
+      return agentsList;
+    } catch { agentLive = false; }
+  }
+  return state.agents || [];
+}
+
+function renderAgents() {
+  app.innerHTML = `
+    <div class="grid cols-2">
+      <div class="glass card">
+        <h3>构建智能体 <span style="font-size:11px;color:var(--muted);font-weight:400">P12 身份即清单</span></h3>
+        <div class="form" id="agent-form">
+          <div class="frow"><label>名称 *</label><input id="af-name" placeholder="巡逻员 · Patrol"></div>
+          <div class="frow"><label>ID *</label><input id="af-id" placeholder="patrol-01"></div>
+          <div class="frow"><label>角色</label><select id="af-role">${state.roles.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('')}<option value="custom">custom · 自定义</option></select></div>
+          <div class="frow"><label>工具授予</label><div class="chips" id="af-tools">
+            ${state.mcpTools.map((t) => `<label class="chip toolpick"><input type="checkbox" value="${esc(t.name)}"> ${esc(t.name)}</label>`).join('')}
+          </div></div>
+          <div class="frow"><label>说明</label><input id="af-note" placeholder="可选"></div>
+          <div class="chips"><button class="btn-ghost" id="af-submit" style="border-color:rgba(110,231,255,.5);color:var(--accent)">⚙ 注册智能体</button></div>
+          <div class="sub" id="af-result"></div>
+        </div>
+      </div>
+      <div class="glass card">
+        <h3>注册表 <span id="ag-mode" class="topic" style="margin:0"></span></h3>
+        <div id="ag-list" class="sub" style="font-size:12px">加载中…</div>
+      </div>
+    </div>
+    <div class="glass card" style="margin-top:14px">
+      <h3>角色契约（platform/roles/）</h3>
+      <div class="chips">${state.roles.map((r) => chip('', `${esc(r.name)} · ${r.id}.md`)).join('')}</div>
+      <div class="sub">角色是契约而非编制（P6）：一个 agent 可身兼多角；构建 = 把契约实例化为机读清单（P12）。</div>
+    </div>`;
+
+  const listEl = document.getElementById('ag-list');
+  const modeEl = document.getElementById('ag-mode');
+  const renderList = (agents) => {
+    modeEl.textContent = agentLive ? '实时 · 经 MCP HTTP' : '快照 · 静态托管（构建请用 MCP HTTP）';
+    listEl.innerHTML = `<table>
+      <tr><th>ID</th><th>名称</th><th>角色</th><th>工具</th><th>状态</th></tr>
+      ${agents.map((a) => `<tr>
+        <td><b style="color:var(--accent)">${esc(a.id)}</b></td>
+        <td>${esc(a.name)}</td>
+        <td>${esc(a.role)}</td>
+        <td style="color:var(--muted);font-size:11px">${(a.tools || []).length} 项</td>
+        <td>${statusChip(a.status)}</td>
+      </tr>`).join('')}
+    </table>`;
+  };
+  getAgents().then(renderList);
+
+  document.getElementById('af-submit').addEventListener('click', async () => {
+    const name = document.getElementById('af-name').value.trim();
+    const id = document.getElementById('af-id').value.trim();
+    const role = document.getElementById('af-role').value;
+    const tools = [...document.querySelectorAll('#af-tools input:checked')].map((i) => i.value);
+    const note = document.getElementById('af-note').value.trim();
+    const result = document.getElementById('af-result');
+    if (!agentLive) {
+      const payload = { id, name, role, tools, permissions: { write: [], forbidden: ['scripts/accept.mjs', 'scripts/verify.mjs'] }, note };
+      result.innerHTML = `<span style="color:var(--gold)">静态托管模式：把下面的 JSON 加入 platform/agents.json 并提交</span>
+        <pre class="code" style="margin-top:8px">${esc(JSON.stringify(payload, null, 2))}</pre>`;
+      return;
+    }
+    try {
+      const out = await mcpCall('tools/call', { name: 'register_agent', arguments: { id, name, role, tools, note } });
+      result.innerHTML = `<span style="color:var(--green)">✓ ${esc(out)}</span>`;
+      agentsList = JSON.parse(await mcpCall('tools/call', { name: 'list_agents', arguments: {} }));
+      renderList(agentsList);
+    } catch (err) {
+      result.innerHTML = `<span style="color:var(--red)">✗ ${esc(String(err.message).slice(0, 160))}</span>`;
+    }
+  });
+}
+
 // ---------------------------------------------------------------- 路由
-const renderers = { overview: renderOverview, orders: renderOrders, knowledge: renderKnowledge, laws: renderLaws, trace: renderTrace, iterations: renderIterations, join: renderJoin };
+const renderers = { overview: renderOverview, orders: renderOrders, knowledge: renderKnowledge, agents: renderAgents, laws: renderLaws, trace: renderTrace, iterations: renderIterations, join: renderJoin };
 function route() {
   const raw = (location.hash || '#/overview').replace('#/', '');
   const [tab, query] = raw.split('?');
@@ -334,9 +426,8 @@ function route() {
   document.querySelectorAll('#tabs a').forEach((a) => a.classList.toggle('active', a.dataset.tab === tab));
 }
 document.getElementById('btn-refresh').addEventListener('click', async (e) => {
-  e.target.textContent = '⟳ 编译中…';
-  // 浏览器无法执行本地脚本——提示用 CLI 重建；此处仅强刷缓存
-  state = await (await fetch(`./console/state.json?t=${Date.now()}`)).json();
+  e.target.textContent = '⟳ 刷新中…';
+  state = await (await fetch('./console/state.json', { cache: 'no-store' })).json();
   e.target.textContent = '⟳ 刷新状态';
   route();
 });

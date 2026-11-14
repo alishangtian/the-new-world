@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-14T06:30:46.428Z",
+  "generatedAt": "2026-11-14T06:40:20.698Z",
   "counts": {
     "orders": 8,
     "ordersOpen": 4,
     "knowledge": 11,
-    "laws": 11,
-    "iterations": 7,
+    "laws": 12,
+    "iterations": 8,
     "dispatches": 1,
-    "mcpTools": 8
+    "mcpTools": 10
   },
   "orders": [
     {
@@ -128,7 +128,7 @@
     {
       "id": "ORD-013",
       "title": "Agent 运行时注册表：agents.json 清单模式",
-      "status": "claimed",
+      "status": "delivered",
       "priority": 17,
       "scores": {
         "impact": 5,
@@ -155,11 +155,12 @@
         "四角色各有一条清单实例",
         "verify/accept 全绿；账本登记"
       ],
-      "claimedBy": "scheduler (auto)",
+      "claimedBy": "zcode(bigmodel) · 迭代 008（消费调度器施工包）",
       "claimedAt": "2026-11-14T04:25:03.620Z",
-      "deliveredIn": null,
-      "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。",
-      "auto": true
+      "deliveredIn": "008",
+      "notes": "考察锚点：K-004。现有 roles/ 是契约文档，本工单把它升格为机读清单。\n[调度器 2026-11-14T04:25:03.620Z] 施工包 dispatch-006-ORD-013 已派发；迭代 008 由 zcode(bigmodel) 消费本包执行。",
+      "auto": true,
+      "acceptedAt": "2026-11-14"
     },
     {
       "id": "ORD-015",
@@ -591,6 +592,17 @@
         "K-001",
         "K-011"
       ]
+    },
+    {
+      "id": "P12",
+      "name": "身份即清单",
+      "law": "agent 的身份 = 机读清单（能力/工具/权限边界），可注册、可审计；权限必须显式写 forbidden",
+      "where": "`platform/agents.json` · MCP `list_agents`/`register_agent`",
+      "evidence": "K-004 · K-006",
+      "kids": [
+        "K-004",
+        "K-006"
+      ]
     }
   ],
   "iterations": [
@@ -642,6 +654,13 @@
       "date": "2026-11-14",
       "goal": "把平台（控制台 + MCP 服务）打包为容器，部署到本机 k3d 集群；MCP 走 HTTP 传输，任何 agent 平台可经网络调用平台工具。",
       "clue": "Ingress 暴露（替代 port-forward）；HPA 多副本（P9 心跳频率联动）；镜像 tag 与"
+    },
+    {
+      "n": 8,
+      "title": "智能体注册表与构建页",
+      "date": "2026-11-14",
+      "goal": "消费调度器施工包 ORD-013——agent 身份机读化（P12），并在控制台交付\"构建智能体\"交互页。",
+      "clue": "agent 状态流转（idle→working）与心跳联动；注册表接入 A2A agent card（ORD-015）。"
     }
   ],
   "dispatches": [
@@ -709,6 +728,185 @@
     {
       "name": "dispatch_next",
       "description": "调用平台调度器：回收超时认领、派发下一张 auto-ok 工单并生成施工包。dry=true 只观测不落盘。"
+    },
+    {
+      "name": "list_agents",
+      "description": "列出注册的智能体（角色/工具/状态/最近贡献）——P12 身份即清单。"
+    },
+    {
+      "name": "register_agent",
+      "description": "注册一个智能体到 platform/agents.json（校验 id/角色/工具白名单）。"
+    }
+  ],
+  "agents": [
+    {
+      "id": "explorer-01",
+      "name": "考察员 · Explorer",
+      "role": "explorer",
+      "contract": "platform/roles/explorer.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "list_orders",
+        "read_order",
+        "list_knowledge",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [
+          "knowledge/"
+        ],
+        "forbidden": [
+          "scripts/accept.mjs",
+          "LAWS.md 直接修订"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "004",
+        "note": "K-001…K-008 八条世界考察入库"
+      }
+    },
+    {
+      "id": "builder-01",
+      "name": "建造师 · Builder",
+      "role": "builder",
+      "contract": "platform/roles/builder.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "list_orders",
+        "read_order",
+        "platform_state",
+        "list_knowledge",
+        "run_gates"
+      ],
+      "permissions": {
+        "write": [
+          "platform/",
+          "console/",
+          "LAWS.md（按考察条目）"
+        ],
+        "forbidden": [
+          "scripts/accept.mjs",
+          "scripts/verify.mjs"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "007",
+        "note": "MCP 核心抽离 + HTTP 传输 + k8s 清单"
+      }
+    },
+    {
+      "id": "auditor-01",
+      "name": "质检员 · Auditor",
+      "role": "auditor",
+      "contract": "platform/roles/auditor.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "run_gates",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [],
+        "forbidden": [
+          "修改 accept.mjs / verify.mjs",
+          "替建造师修代码"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "007",
+        "note": "五门验收 PASS 判定"
+      }
+    },
+    {
+      "id": "chronicler-01",
+      "name": "史官 · Chronicler",
+      "role": "chronicler",
+      "contract": "platform/roles/chronicler.md",
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "write_ledger",
+        "close_order",
+        "list_orders",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [
+          "docs/ITERATIONS.md（只追加）",
+          "BACKLOG.md",
+          "platform/orders/"
+        ],
+        "forbidden": [
+          "改写历史条目"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "007",
+        "note": "迭代 007 记账与推送"
+      }
+    },
+    {
+      "id": "patrol-01",
+      "name": "巡逻员 · Patrol",
+      "role": "custom",
+      "contract": null,
+      "runtime": "external",
+      "transport": [
+        "stdio",
+        "http"
+      ],
+      "tools": [
+        "run_gates",
+        "platform_state"
+      ],
+      "permissions": {
+        "write": [],
+        "forbidden": [
+          "scripts/accept.mjs",
+          "scripts/verify.mjs"
+        ]
+      },
+      "status": "idle",
+      "lastContribution": {
+        "iteration": "008",
+        "note": "控制台构建表单实时注册演示（k8s MCP HTTP）"
+      }
+    }
+  ],
+  "roles": [
+    {
+      "id": "auditor",
+      "name": "质检员（Auditor）"
+    },
+    {
+      "id": "builder",
+      "name": "建造师（Builder）"
+    },
+    {
+      "id": "chronicler",
+      "name": "史官（Chronicler）"
+    },
+    {
+      "id": "explorer",
+      "name": "考察员（Explorer）"
     }
   ],
   "crossRefs": {
@@ -723,14 +921,16 @@
       "P3"
     ],
     "K-004": [
-      "P4"
+      "P4",
+      "P12"
     ],
     "K-005": [
       "P5",
       "P9"
     ],
     "K-006": [
-      "P6"
+      "P6",
+      "P12"
     ],
     "K-007": [
       "P7"

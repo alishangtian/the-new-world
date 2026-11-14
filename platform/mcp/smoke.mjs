@@ -78,6 +78,12 @@ try {
   const disp = JSON.parse((await call('tools/call', { name: 'dispatch_next', arguments: { dry: true } })).content[0].text);
   check('dispatch_next 观测模式', typeof disp.dispatched === 'boolean', disp.dispatched ? `将派 ${disp.orderId}` : disp.reason);
 
+  const agents = JSON.parse((await call('tools/call', { name: 'list_agents', arguments: {} })).content[0].text);
+  check('list_agents 注册表', Array.isArray(agents) && agents.length >= 4, `${agents.length} 个智能体`);
+
+  const badReg = await call('tools/call', { name: 'register_agent', arguments: { id: 'x-01', name: 'x', role: 'explorer', tools: ['不存在的工具'] } });
+  check('register_agent 校验拦截', badReg.isError === true, '未知工具被拒');
+
   const bad = await call('tools/call', { name: 'write_ledger', arguments: { iteration_id: '999', entry_markdown: '## 错误格式' } });
   check('write_ledger 校验拦截', bad.isError === true, '格式非法被拒');
 
