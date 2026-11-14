@@ -1,0 +1,39 @@
+{
+  "id": "ORD-018",
+  "title": "控制台富功能化：溯源链/时间线/施工包视图/交叉筛选",
+  "status": "delivered",
+  "auto": false,
+  "priority": 19,
+  "scores": {
+    "impact": 5,
+    "data": 5,
+    "law": 3,
+    "drama": 4
+  },
+  "goal": "把平台自身的'认知→规律→施工→交付'链路做成可交互的页面能力：让人类在浏览器里能看懂每一次迭代从哪来、改了什么、落在哪",
+  "leads": [
+    {
+      "source": "LangSmith / AgentOps 等 agent 可观测性控制台的功能范式（trace timeline、run 对比、live 指标）",
+      "url": "https://www.langchain.com/langsmith",
+      "license": "参考范式"
+    },
+    {
+      "source": "平台自有数据：knowledge/ + orders/ + dispatch/ + ITERATIONS.md（K-005/K-007 已入库）",
+      "url": "https://github.com/alishangtian/the-new-world",
+      "license": "MIT"
+    }
+  ],
+  "lawDraft": "P4/P5/P7 的 UI 落地：可追溯（trace 视图）、显式状态机（时间线）、只追加账本（账本页详情化）",
+  "acceptance": [
+    "新增溯源链页：每条设计规律可展开'考察条目→规律→落地文件'完整链路，双向可导航",
+    "工单页支持状态筛选与施工包视图（runbook 步骤可见）",
+    "知识库支持主题 chips 筛选 + 认知↔规律交叉跳转",
+    "迭代账本页时间线化并展示目标/遗留线索；总览新增主题分布与心跳状态",
+    "零依赖不破坏；accept 五门全绿；浏览器逐页演示"
+  ],
+  "claimedBy": "zcode(bigmodel) · 迭代 006",
+  "claimedAt": "2026-11-14T05:00:00Z",
+  "deliveredIn": "006",
+  "notes": "由迭代 006 演示施工（用户点名：需要更丰富的页面功能，并演示迭代产出）。",
+  "acceptedAt": "2026-11-14"
+}

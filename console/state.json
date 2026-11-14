@@ -1,13 +1,54 @@
 {
-  "generatedAt": "2026-11-14T04:25:19.814Z",
+  "generatedAt": "2026-11-14T04:55:07.211Z",
   "counts": {
-    "orders": 6,
+    "orders": 7,
     "ordersOpen": 4,
-    "knowledge": 9,
-    "laws": 9,
-    "iterations": 5
+    "knowledge": 10,
+    "laws": 10,
+    "iterations": 6,
+    "dispatches": 1,
+    "mcpTools": 8
   },
   "orders": [
+    {
+      "id": "ORD-018",
+      "title": "控制台富功能化：溯源链/时间线/施工包视图/交叉筛选",
+      "status": "delivered",
+      "auto": false,
+      "priority": 19,
+      "scores": {
+        "impact": 5,
+        "data": 5,
+        "law": 3,
+        "drama": 4
+      },
+      "goal": "把平台自身的'认知→规律→施工→交付'链路做成可交互的页面能力：让人类在浏览器里能看懂每一次迭代从哪来、改了什么、落在哪",
+      "leads": [
+        {
+          "source": "LangSmith / AgentOps 等 agent 可观测性控制台的功能范式（trace timeline、run 对比、live 指标）",
+          "url": "https://www.langchain.com/langsmith",
+          "license": "参考范式"
+        },
+        {
+          "source": "平台自有数据：knowledge/ + orders/ + dispatch/ + ITERATIONS.md（K-005/K-007 已入库）",
+          "url": "https://github.com/alishangtian/the-new-world",
+          "license": "MIT"
+        }
+      ],
+      "lawDraft": "P4/P5/P7 的 UI 落地：可追溯（trace 视图）、显式状态机（时间线）、只追加账本（账本页详情化）",
+      "acceptance": [
+        "新增溯源链页：每条设计规律可展开'考察条目→规律→落地文件'完整链路，双向可导航",
+        "工单页支持状态筛选与施工包视图（runbook 步骤可见）",
+        "知识库支持主题 chips 筛选 + 认知↔规律交叉跳转",
+        "迭代账本页时间线化并展示目标/遗留线索；总览新增主题分布与心跳状态",
+        "零依赖不破坏；accept 五门全绿；浏览器逐页演示"
+      ],
+      "claimedBy": "zcode(bigmodel) · 迭代 006",
+      "claimedAt": "2026-11-14T05:00:00Z",
+      "deliveredIn": "006",
+      "notes": "由迭代 006 演示施工（用户点名：需要更丰富的页面功能，并演示迭代产出）。",
+      "acceptedAt": "2026-11-14"
+    },
     {
       "id": "ORD-012",
       "title": "任务调度器：让平台自主触发迭代",
@@ -361,6 +402,28 @@
       ],
       "insight": "GitHub Actions 原生支持 POSIX cron 定时触发（UTC，最小 5 分钟间隔，高峰期可能延迟），无需自建调度器即可让仓库获得'心跳'。但心跳只是发令枪：真正自主循环 = 心跳（触发）+ 显式状态机（决定做什么）+ 断点续跑（账本），三者缺一不可；CI 环境只适合做确定性决策（选工单/发令），需要 LLM 的施工仍应交给接入的 agent。",
       "appliedTo": "platform/scheduler.mjs（确定性派单：只派 auto-ok 工单、认领超时自动回收、派单包落盘）+ .github/workflows/tick.yml（每日心跳，--dry 观测模式）。"
+    },
+    {
+      "id": "K-010",
+      "date": "2026-11-14",
+      "topic": "可观测性",
+      "title": "Agent 可观测性控制台的行业范式：trace 时间线 + span 检查 + 回放 + 评估",
+      "sources": [
+        {
+          "title": "AgentOps vs LangSmith：LLM Tracing 对比",
+          "url": "https://www.icertglobal.com/community/agentops-vs-langsmith-llm-tracing-comparison"
+        },
+        {
+          "title": "Top 5 LLM & Agent Observability Tools in 2026 (MLflow)",
+          "url": "https://mlflow.ai/top/llm-agent-observability-tools/"
+        },
+        {
+          "title": "6 Best AI Agent Observability Tools for Production in 2026 (Vellum)",
+          "url": "https://www.vellum.ai/blog/ai-agent-observability-tools"
+        }
+      ],
+      "insight": "2026 年 agent 可观测性平台（LangSmith/AgentOps/Langfuse/Phoenix…）的功能公约数：会话与步骤级的 trace 时间线、span 检查与回放、评估回归挂载、成本/异常追踪——'看得见的施工过程'本身就是平台能力，头部平台已用 AI 自动检测 trace 中的问题。控制台不是报表，是施工链路的回放器。",
+      "appliedTo": "平台控制台（index.html + console/）按此范式升级：迭代时间线、施工包（runbook）视图、认知→规律→落地的溯源链、状态筛选与交叉跳转——把 P4 可追溯与 P5 显式状态机变成人类可回放的页面能力。"
     }
   ],
   "laws": [
@@ -369,85 +432,279 @@
       "name": "工具先行",
       "law": "平台能力一律以标准工具（MCP）暴露给 agent，而不是对话框与文档",
       "where": "`platform/mcp/server.mjs`",
-      "evidence": "K-001"
+      "evidence": "K-001",
+      "kids": [
+        "K-001"
+      ]
     },
     {
       "id": "P2",
       "name": "工单驱动",
       "law": "施工以机器可读工单为单位（目标+验收标准），不以聊天记忆为单位；工单是跨 agent 任务交接的最小载体",
       "where": "`platform/orders/`",
-      "evidence": "K-002"
+      "evidence": "K-002",
+      "kids": [
+        "K-002"
+      ]
     },
     {
       "id": "P3",
       "name": "渐进披露",
       "law": "岗位文档 = 触发元数据 + 按需加载正文；上下文是预算",
       "where": "`.zcode/skills/world-builder/`",
-      "evidence": "K-003"
+      "evidence": "K-003",
+      "kids": [
+        "K-003"
+      ]
     },
     {
       "id": "P4",
       "name": "护栏内置",
       "law": "输入输出有可编程护栏，全程可追溯；FAIL 即打回",
       "where": "`scripts/accept.mjs` · `platform/roles/auditor.md`",
-      "evidence": "K-004"
+      "evidence": "K-004",
+      "kids": [
+        "K-004"
+      ]
     },
     {
       "id": "P5",
       "name": "显式状态机",
       "law": "流程是显式的节点/边/条件，配合 checkpoint 持久化；隐式对话流不可维护",
       "where": "`platform/PROTOCOL.md` · `docs/ITERATIONS.md`",
-      "evidence": "K-005"
+      "evidence": "K-005",
+      "kids": [
+        "K-005"
+      ]
     },
     {
       "id": "P6",
       "name": "契约而非编制",
       "law": "角色是契约（目标/输入/输出/禁令），不是人格；一个运行时可身兼多角",
       "where": "`platform/roles/`",
-      "evidence": "K-006"
+      "evidence": "K-006",
+      "kids": [
+        "K-006"
+      ]
     },
     {
       "id": "P7",
       "name": "记忆两层",
       "law": "事件流只追加（可审计），知识层可检索（可去重）；改写历史 = 记忆损坏",
       "where": "`docs/ITERATIONS.md` · `knowledge/`",
-      "evidence": "K-007"
+      "evidence": "K-007",
+      "kids": [
+        "K-007"
+      ]
     },
     {
       "id": "P8",
       "name": "爆炸半径最小化",
       "law": "工具按危险度分级；'先跑门再合并'是行业纪律而非美德",
       "where": "`scripts/accept.mjs` · PROTOCOL 红线",
-      "evidence": "K-008"
+      "evidence": "K-008",
+      "kids": [
+        "K-008"
+      ]
     },
     {
       "id": "P9",
       "name": "自主触发",
       "law": "持续构建 = 心跳（定时触发）+ 确定性派单（只派 auto-ok 工单）+ 断点续跑（账本唯一迭代号）；心跳只发令，需要认知与代码的施工交给接入的 agent",
       "where": "`platform/scheduler.mjs` · `.github/workflows/tick.yml`",
-      "evidence": "K-005 · K-009"
+      "evidence": "K-005 · K-009",
+      "kids": [
+        "K-005",
+        "K-009"
+      ]
+    },
+    {
+      "id": "P10",
+      "name": "可观测一等",
+      "law": "施工链路（考察→施工→交付）必须人类可回放：trace 时间线、span 检查、溯源链是控制台的一等能力，不是报表",
+      "where": "`console/` · `scripts/build_console_state.mjs`",
+      "evidence": "K-010",
+      "kids": [
+        "K-010"
+      ]
     }
   ],
   "iterations": [
     {
       "n": 1,
-      "title": "初建世界"
+      "title": "初建世界",
+      "date": "2026-11-14",
+      "goal": "建立世界本体与施工体系——引擎、六块知识砖、交互界面、可溯源数据层、体检与技能。",
+      "clue": "国别卡片可实时跟随时间轴刷新；移动端双指缩放可再加惯性。"
     },
     {
       "n": 2,
-      "title": "板块与地震"
+      "title": "板块与地震",
+      "date": "2026-11-14",
+      "goal": "把\"地球最活跃的动力学\"编码进世界——让 L7 板块律肉眼可见：震中沿板块边界聚集。",
+      "clue": "可加震深维度（深源地震着色）；USGS 30 天窗口可改为拉取更长历史做\"地震气候\"。"
     },
     {
       "n": 3,
-      "title": "agent 平台化"
+      "title": "agent 平台化",
+      "date": "2026-11-14",
+      "goal": "把仓库从\"技能驱动的迭代项目\"升级为 **agent 平台**——任何平台的 agent 都能",
+      "clue": "让 Proteus 等外部 agent 平台实际接入施工一轮（迭代 004 可从 ORD-004 航线网开始）；"
     },
     {
       "n": 4,
-      "title": "转向 agent 平台"
+      "title": "转向 agent 平台",
+      "date": "2026-11-14",
+      "goal": "纠正项目方向——本仓库不是世界模拟器，而是 **agent 平台**；\"世界\"指现实中",
+      "clue": "外部 agent 平台（Proteus）实际接入施工一轮；ORD-012 调度器让平台自主触发。"
     },
     {
       "n": 5,
-      "title": "任务调度器"
+      "title": "任务调度器",
+      "date": "2026-11-14",
+      "goal": "平台获得自主触发能力（P9 立法落地）——心跳发令、确定性派单、断点续跑。",
+      "clue": "tick 心跳目前只观测；接入 agent runner 后可升级为完整自主循环（配合 ORD-015）。"
+    },
+    {
+      "n": 6,
+      "title": "控制台富功能化",
+      "date": "2026-11-14",
+      "goal": "按 P10 可观测一等，把平台自身的\"认知→规律→施工→交付\"链路做成可交互的页面能力。",
+      "clue": "控制台可加\"验收门实时状态\"（接入 run_gates）；light 主题；工单页内直接领单按钮。"
+    }
+  ],
+  "dispatches": [
+    {
+      "id": "dispatch-006-ORD-013-20261114042503",
+      "iteration": "006",
+      "orderId": "ORD-013",
+      "title": "Agent 运行时注册表：agents.json 清单模式",
+      "steps": [
+        "EXPLORE：沿 order.leads 考察世界（网络/搜索引擎/GitHub），产出 knowledge/K-*.json",
+        "DISTILL：LAWS.md 立法（引用 K- 条目）",
+        "BUILD：按规律升级平台（零依赖红线）",
+        "VERIFY：node scripts/accept.mjs 五门全 PASS",
+        "LEDGER：docs/ITERATIONS.md 追加本轮（迭代号见本包 iteration 字段）；close_order",
+        "COMMIT：迭代 006 · Agent 运行时注册表：agents.json 清单模式，推送"
+      ],
+      "createdAt": "2026-11-14T04:25:03.620Z"
+    }
+  ],
+  "ticks": [
+    {
+      "id": "dispatch-005-ORD-013-20261114042428",
+      "type": "dispatch",
+      "orderId": "ORD-013",
+      "iteration": "005",
+      "at": "2026-11-14T04:24:28.350Z"
+    },
+    {
+      "id": "dispatch-006-ORD-013-20261114042503",
+      "type": "dispatch",
+      "orderId": "ORD-013",
+      "iteration": "006",
+      "at": "2026-11-14T04:25:03.620Z"
+    }
+  ],
+  "mcpTools": [
+    {
+      "name": "list_orders",
+      "description": "列出平台工单（按优先级降序）。SELECT 步骤的起点：领一张 open 工单施工。"
+    },
+    {
+      "name": "read_order",
+      "description": "读一张工单全文（目标/考察线索/验收标准/notes）。"
+    },
+    {
+      "name": "platform_state",
+      "description": "平台现状：知识条目数/设计规律数/迭代履历/工单分布/下一张待领工单。"
+    },
+    {
+      "name": "list_knowledge",
+      "description": "列出知识库——考察世界（网络/搜索引擎/GitHub）带回的 agent 平台认知，每条含来源与落地位置。可按 topic 过滤。"
+    },
+    {
+      "name": "run_gates",
+      "description": "跑无头验收门（语法/平台体检/自检/知识纪律/账本纪律），返回 PASS/FAIL 与报告。质检员步骤的唯一裁判。"
+    },
+    {
+      "name": "write_ledger",
+      "description": "向 docs/ITERATIONS.md 追加一轮迭代账目（账本只追加；迭代号必须唯一且与条目首行一致）。"
+    },
+    {
+      "name": "close_order",
+      "description": "把工单置为 delivered（须先过 run_gates 的 PASS）。"
+    },
+    {
+      "name": "dispatch_next",
+      "description": "调用平台调度器：回收超时认领、派发下一张 auto-ok 工单并生成施工包。dry=true 只观测不落盘。"
+    }
+  ],
+  "crossRefs": {
+    "K-001": [
+      "P1"
+    ],
+    "K-002": [
+      "P2"
+    ],
+    "K-003": [
+      "P3"
+    ],
+    "K-004": [
+      "P4"
+    ],
+    "K-005": [
+      "P5",
+      "P9"
+    ],
+    "K-006": [
+      "P6"
+    ],
+    "K-007": [
+      "P7"
+    ],
+    "K-008": [
+      "P8"
+    ],
+    "K-009": [
+      "P9"
+    ],
+    "K-010": [
+      "P10"
+    ]
+  },
+  "topics": [
+    {
+      "topic": "协议互操作",
+      "count": 2
+    },
+    {
+      "topic": "agent 工程",
+      "count": 2
+    },
+    {
+      "topic": "编排",
+      "count": 1
+    },
+    {
+      "topic": "多代理协作",
+      "count": 1
+    },
+    {
+      "topic": "记忆",
+      "count": 1
+    },
+    {
+      "topic": "安全与评估",
+      "count": 1
+    },
+    {
+      "topic": "自主循环",
+      "count": 1
+    },
+    {
+      "topic": "可观测性",
+      "count": 1
     }
   ],
   "scheduler": {
