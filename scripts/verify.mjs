@@ -15,11 +15,13 @@ const ok = (msg) => console.log('  ✓ ' + msg);
 // ---------------------------------------------------------------- 数据
 console.log('[1/3] 数据完整性');
 const loadJson = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
-let earth, meta, cities;
+let earth, meta, cities, quakes, plates;
 try {
   earth = loadJson('data/earth.json');
   meta = loadJson('data/meta.json');
   cities = loadJson('data/cities.json');
+  quakes = loadJson('data/quakes.json');
+  plates = loadJson('data/plates.json');
   ok('data/*.json 均可解析');
 } catch (e) {
   fail('数据不可读：' + e.message);
@@ -54,9 +56,17 @@ const worldPopLast = Object.keys(meta.world.pop || {}).sort((a, b) => a - b).at(
 if (worldPopLast) ok(`世界人口序列至 ${worldPopLast} 年`);
 else fail('世界人口序列缺失');
 
+if ((quakes?.quakes?.length || 0) >= 100) ok(`地震快照 ${quakes.quakes.length} 条`);
+else fail('地震快照数量异常');
+const qBad = (quakes?.quakes || []).filter((q) => !isFinite(q.lon) || !isFinite(q.lat) || !isFinite(q.mag)).length;
+if (qBad === 0) ok('地震坐标/震级全部合法');
+else fail(`地震数据存在 ${qBad} 条非法记录`);
+if ((plates?.boundaries?.length || 0) >= 50) ok(`板块边界 ${plates.boundaries.length} 段`);
+else fail('板块边界数量异常');
+
 // ---------------------------------------------------------------- 砖块契约
 console.log('[2/3] 知识砖块契约');
-const MODULE_FILES = ['cosmos', 'terra', 'daynight', 'life', 'links', 'carbon'];
+const MODULE_FILES = ['cosmos', 'terra', 'daynight', 'life', 'links', 'carbon', 'quake'];
 const modules = [];
 for (const name of MODULE_FILES) {
   try {
@@ -95,7 +105,7 @@ function makeCtx() {
   });
 }
 
-const data = { earth, meta, cities };
+const data = { earth, meta, cities, quakes, plates };
 const sims = new WorldSim(data);
 const cam = { lon0: 100, lat0: 30, zoom: 1.2, m: cameraMatrix(100, 30) };
 const simMs = Date.now();
@@ -149,7 +159,7 @@ try {
 
 // ---------------------------------------------------------------- 汇总
 const size = (...ps) => ps.reduce((a, p) => a + statSync(join(ROOT, p)).size, 0) / 1024;
-console.log(`\n数据体积：${size('data/earth.json', 'data/meta.json', 'data/cities.json').toFixed(0)} KB（随仓库离线分发）`);
+console.log(`\n数据体积：${size('data/earth.json', 'data/meta.json', 'data/cities.json', 'data/quakes.json', 'data/plates.json').toFixed(0)} KB（随仓库离线分发）`);
 
 if (failures) {
   console.error(`\n✗ 体检未通过：${failures} 项`);

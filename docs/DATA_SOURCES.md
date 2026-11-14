@@ -12,6 +12,8 @@
 | ISO 编码映射（数字↔字母↔区域） | [lukes/ISO-3166-Countries-with-Regional-Codes](https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes) | 无明确许可（CC0 样式公开数据表） | 2026-11-14 | 建立 数字码↔alpha3↔alpha2 桥 |
 | 国家中文名 | [i18n-iso-countries](https://github.com/michaelwittig/node-i18n-iso-countries) `langs/zh.json` | MIT | 2026-11-14 | alpha2 → 中文名 |
 | 城市（600 座，坐标/人口/首都标记） | [Natural Earth populated places](https://www.naturalearthdata.com/downloads/) `ne_10m_populated_places_simple` | 公有领域 | 2026-11-14 | POP_MAX 去重取前 600；主要城市中文名为人工核对表（`CITY_ZH`） |
+| 地震快照（近 30 天 M2.5+） | [USGS Earthquake Feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.php) `2.5_month.geojson` | 公有领域 | 2026-11-14（迭代 002） | 精简为 lon/lat/mag/depth/time/place，按震级排序 |
+| 板块边界（PB2002，241 段） | [fraxen/tectonicplates](https://github.com/fraxen/tectonicplates) `GeoJSON/PB2002_boundaries.json`（数据：Peter Bird 2003） | ODC-BY 1.0 | 2026-11-14（迭代 002） | 坐标保留 2 位小数，保留边界名 |
 
 ## 产物
 
@@ -20,6 +22,8 @@
 | `data/earth.json` | 177 国边界（GeoJSON）+ 陆地总廓 | ~305 KB |
 | `data/meta.json` | 215 国 × 人口/GDP/CO₂ 时间序列 + 世界聚合 + 中文名 | ~660 KB |
 | `data/cities.json` | 600 座城市（经纬度、人口、ISO3、首都标记、中文名） | ~54 KB |
+| `data/quakes.json` | 地震快照 2002 条（迭代 002，USGS） | ~203 KB |
+| `data/plates.json` | 板块边界 241 段（迭代 002，PB2002） | ~99 KB |
 
 ## 引用规范
 

@@ -17,15 +17,22 @@ python3 scripts/fetch_data.py      # 可重复运行
 node scripts/verify.mjs            # 体检
 ```
 
-## 添加一块知识砖（10 分钟版）
+## 如何贡献：运行一轮迭代
 
-1. **取证**：找到权威数据源（世界银行 / OWID / GitHub 开源项目），确认许可证允许再分发。
-   把转换逻辑写进 `scripts/fetch_data.py`，产物落 `data/`，来源写进 `docs/DATA_SOURCES.md`。
-2. **建砖**：复制 `src/modules/links.js` 的骨架（或阅读技能 `.zcode/skills/world-builder/SKILL.md`
-   里的完整模板），新建 `src/modules/<id>.js`，在 `src/main.js` 加一行 import。
-3. **立法**：实现的规律登记 `LAWS.md`；简化假设写进"诚实声明"；砖块 `laws`/`sources` 字段填好。
-4. **验收**：`node scripts/verify.mjs` 全绿 → 起 HTTP 服务在浏览器里开关这块砖、拖拽、点击、拨时间轴。
-5. **提交**：`砖 · <主题>：<一句话>`。
+本项目的贡献单位是「迭代」。完整规程以 `.zcode/skills/world-builder/SKILL.md` 为准，
+概要如下（七步，顺序执行）：
+
+1. **SELECT**：从 `BACKLOG.md` 取候选，或由 issue/讨论指定主题；一轮 = 一块砖。
+2. **RESEARCH**：取证（开放 API / GitHub 开源 / 搜索交叉验证），记录 URL + 许可 + 取数日期；
+   抽样核对已知值；取不到可信数据就中止并在 BACKLOG 记 blocker。
+3. **ENCODE**：转换逻辑进 `scripts/fetch_data.py`，产物进 `data/`（随仓库提交）。
+4. **WIRE**：新建 `src/modules/<id>.js`（契约见 `src/engine/modules.js`），`main.js` 加 import；
+   规律登记 `LAWS.md`。
+5. **VERIFY**：`node scripts/verify.mjs` 全绿 + 浏览器交互验收（起服务、开关砖、拖/点/拨）。
+6. **LEDGER**：`docs/ITERATIONS.md` 追加一轮，`BACKLOG.md` 勾选，`docs/DATA_SOURCES.md` 登记。
+7. **COMMIT**：`迭代 NNN · <主题>：<一句话>`，推送。
+
+踩坑先读 `.zcode/skills/world-builder/references/lessons.md`——十条教训，每条都真实发生过。
 
 ## 规则
 
@@ -37,6 +44,6 @@ node scripts/verify.mjs            # 体检
 
 ## AI 协作者
 
-本仓库内置 `world-builder` 技能（`.zcode/skills/world-builder/`）——
-在 ZCode 中于本仓库内要求"新增一个世界模块"等即会自动加载施工手册；
-`references/lessons.md` 记录了初建时踩过的全部坑，动代码前值得一读。
+本仓库的 `world-builder` 技能是**持续迭代引擎**：在本仓库内说「继续迭代」「加一块砖」
+「更新数据」等即会自动加载并驱动一轮完整迭代。历史迭代见 `docs/ITERATIONS.md`，
+下一轮从 `BACKLOG.md` 选题。

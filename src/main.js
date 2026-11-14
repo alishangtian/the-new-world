@@ -11,6 +11,7 @@ import './modules/terra.js';
 import './modules/daynight.js';
 import './modules/life.js';
 import './modules/links.js';
+import './modules/quake.js';
 import './modules/carbon.js';
 
 import { initPanel } from './ui/panel.js';
@@ -36,12 +37,14 @@ boot().catch((err) => {
 
 async function boot() {
   const t0 = performance.now();
-  const [earth, meta, cities] = await Promise.all([
+  const [earth, meta, cities, quakes, plates] = await Promise.all([
     j('data/earth.json'),
     j('data/meta.json'),
     j('data/cities.json'),
+    j('data/quakes.json'),
+    j('data/plates.json'),
   ]);
-  const data = { earth, meta, cities };
+  const data = { earth, meta, cities, quakes, plates };
 
   const engine = new Engine(document.getElementById('world'), data);
   engine.sims = new WorldSim(data);

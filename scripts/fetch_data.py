@@ -33,6 +33,8 @@ ISO_CSV = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regio
 ZH_JSON = "https://cdn.jsdelivr.net/npm/i18n-iso-countries@7/langs/zh.json"
 CITIES_GEOJSON = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson"
 OWID_CO2_CSV = "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv"
+USGS_QUAKES = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.geojson"
+PLATES_PB2002 = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
 
 INDICATORS = {
     "pop": "SP.POP.TOTL",       # 人口总数
@@ -347,6 +349,64 @@ def build_cities():
     }
 
 
+# ---------------------------------------------------------------- 迭代 002 · 板块与地震
+def build_quakes():
+    """USGS 近 30 天 M2.5+ 地震（公有领域）-> 精简快照。"""
+    doc = json.loads(fetch(USGS_QUAKES).decode("utf-8"))
+    quakes = []
+    for f in doc.get("features", []):
+        p = f.get("properties", {})
+        g = (f.get("geometry") or {}).get("coordinates") or [None, None, None]
+        mag = p.get("mag")
+        lon, lat, depth = g[0], g[1], g[2]
+        if mag is None or lon is None or lat is None:
+            continue
+        quakes.append({
+            "lon": round(lon, 3),
+            "lat": round(lat, 3),
+            "mag": round(mag, 1),
+            "dep": round(depth or 0, 1),
+            "t": p.get("time", 0),
+            "w": (p.get("place") or "")[:60],
+        })
+    quakes.sort(key=lambda q: -q["mag"])
+    print(f"  [USGS] 地震 {len(quakes)} 条（M2.5+，近 30 天）")
+    return {
+        "meta": {
+            "generator": "scripts/fetch_data.py",
+            "source": USGS_QUAKES,
+            "license": "USGS 公有领域",
+            "window": "近 30 天 M2.5+",
+            "retrievedAt": date.today().isoformat(),
+        },
+        "quakes": quakes,
+    }
+
+
+def build_plates():
+    """PB2002 板块边界（Bird 2003，ODC-BY）-> 线段链。"""
+    doc = json.loads(fetch(PLATES_PB2002).decode("utf-8"))
+    boundaries = []
+    for f in doc.get("features", []):
+        g = f.get("geometry") or {}
+        if g.get("type") != "LineString":
+            continue
+        pts = [[round(lon, 2), round(lat, 2)] for lon, lat in g.get("coordinates", [])]
+        if len(pts) < 2:
+            continue
+        boundaries.append({"name": (f.get("properties") or {}).get("Name", ""), "pts": pts})
+    print(f"  [PB2002] 板块边界 {len(boundaries)} 段")
+    return {
+        "meta": {
+            "generator": "scripts/fetch_data.py",
+            "source": PLATES_PB2002,
+            "license": "ODC-BY 1.0（数据：Peter Bird 2003, PB2002）",
+            "retrievedAt": date.today().isoformat(),
+        },
+        "boundaries": boundaries,
+    }
+
+
 def dump(path, obj):
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(obj, fh, ensure_ascii=False, separators=(",", ":"))
@@ -362,6 +422,10 @@ def main():
     dump("data/meta.json", build_meta())
     print("  3/3 Natural Earth 城市 -> data/cities.json")
     dump("data/cities.json", build_cities())
+    print("  4/5 USGS 地震 -> data/quakes.json")
+    dump("data/quakes.json", build_quakes())
+    print("  5/5 PB2002 板块边界 -> data/plates.json")
+    dump("data/plates.json", build_plates())
     print(f"✅ 完成 {datetime.now(timezone.utc).isoformat(timespec='seconds')}")
 
 
