@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: platform
-          image: the-new-world:0.7.0
+          image: the-new-world:0.10.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

@@ -1,12 +1,21 @@
 {
   "id": "ORD-015",
   "title": "Agent 互操作层：工单对接 A2A 任务对象",
-  "status": "open",
+  "status": "delivered",
   "priority": 16,
-  "scores": { "impact": 5, "data": 3, "law": 4, "drama": 4 },
+  "scores": {
+    "impact": 5,
+    "data": 3,
+    "law": 4,
+    "drama": 4
+  },
   "goal": "外部 agent 平台的 agent 能以 A2A 方式发现本平台、领取工单、回传结果",
   "leads": [
-    { "source": "A2A 协议（Linux Foundation）", "url": "https://github.com/a2aproject/a2a", "license": "Apache-2.0" }
+    {
+      "source": "A2A 协议（Linux Foundation）",
+      "url": "https://github.com/a2aproject/a2a",
+      "license": "Apache-2.0"
+    }
   ],
   "lawDraft": "L12 候选（K-002）：平台间施工 = 发现（agent card）+ 交接（任务对象）+ 凭证（验收门结果）",
   "acceptance": [
@@ -14,6 +23,9 @@
     "工单 ↔ A2A 任务对象的最小映射实现并测试",
     "verify/accept 全绿；账本登记"
   ],
-  "claimedBy": null, "claimedAt": null, "deliveredIn": null,
-  "notes": "考察锚点：K-002。当前 MCP 已覆盖 agent↔工具，本工单补 agent↔agent。"
+  "claimedBy": "zcode(bigmodel) · 迭代 010",
+  "claimedAt": "2026-11-17T02:00:00Z",
+  "deliveredIn": "010",
+  "notes": "考察锚点：K-002。当前 MCP 已覆盖 agent↔工具，本工单补 agent↔agent。",
+  "acceptedAt": "2026-11-17"
 }

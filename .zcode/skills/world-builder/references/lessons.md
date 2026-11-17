@@ -43,3 +43,8 @@
 ## 10. 账本一致性的自动化
 人读总览（BACKLOG.md）与机器工单（orders/*.json）两处状态必然漂移——
 漂移不可怕，没有"漂移即 FAIL"的检查才可怕。verify 负责抓漂移。
+
+## 11. `kubectl apply` 会回退 `kubectl set image`
+声明式清单与命令式修改混用：`set image` 改了线上镜像，之后 `apply` 旧清单把镜像 tag 回退——
+Pod 看似 Running，跑的却是旧代码（grep 容器内文件 vs 镜像文件才定位到）。
+**纪律**：镜像 tag 的唯一真源是清单文件；升级 = 改清单 → apply，不要用 set image 抄近路。

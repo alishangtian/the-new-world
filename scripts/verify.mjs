@@ -62,6 +62,34 @@ try {
   fail('注册表: ' + e.message.split('\n')[0]);
 }
 
+// ---------------------------------------------------------------- A2A 互操作
+console.log('[3.2/4] A2A 互操作（ORD-015）');
+try {
+  const a2a = await import(join(ROOT, 'platform/a2a.mjs'));
+  // 1. 状态映射完整性：每个工单状态都必须有 A2A state
+  const STATES = ['open', 'claimed', 'delivered', 'blocked'];
+  const fixtures = STATES.map((s) => ({ id: 'ORD-000', status: s, title: 'x', goal: 'x', priority: 1, acceptance: [], leads: [] }));
+  const states = fixtures.map((f) => a2a.orderToTask(f).status.state);
+  const legal = new Set(['submitted', 'working', 'completed', 'failed']);
+  if (!states.every((s) => legal.has(s))) fail(`状态映射越界: ${states.join(',')}`);
+  else ok('工单状态 → A2A state 映射完整（submitted/working/completed/failed）');
+  // 2. Agent Card 形状
+  const card = a2a.agentCard({ baseUrl: 'http://x', mcpTools: [{}] });
+  for (const k of ['name', 'description', 'url', 'version', 'capabilities', 'skills']) {
+    if (card[k] == null) fail(`Agent Card 缺字段 ${k}`);
+  }
+  if (card.skills.length < 3) fail('Agent Card skills 不足 3 个');
+  ok(`Agent Card 形状合法（${card.skills.length} skills，version ${card.version}）`);
+  // 3. 入站映射校验（纯函数：拒空任务、拒非法 acceptance 透传）
+  try { a2a.taskToOrderDraft({}); fail('空任务未被拒绝'); }
+  catch { ok('入站空任务被正确拒绝'); }
+  const draft = a2a.taskToOrderDraft({ title: '外部任务', description: 'd', metadata: { source: 'verify', acceptance: ['a1'] } });
+  if (draft.status !== 'open' || !draft.leads.length) fail('入站映射字段不合法');
+  else ok('入站任务 → 工单草稿映射合法');
+} catch (e) {
+  fail('A2A: ' + e.message.split('\n')[0]);
+}
+
 // ---------------------------------------------------------------- 设计原则
 console.log('[3/4] 设计原则');
 const lawRows = read('LAWS.md').match(/^\| P\d+ \|.+$/gm) || [];

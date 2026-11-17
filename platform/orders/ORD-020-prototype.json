@@ -1,7 +1,7 @@
 {
   "id": "ORD-020",
   "title": "平台雏形：对话与任务指挥（生产力核心）",
-  "status": "claimed",
+  "status": "delivered",
   "auto": false,
   "priority": 25,
   "scores": {
@@ -33,6 +33,7 @@
   ],
   "claimedBy": "zcode(bigmodel) · 迭代 009",
   "claimedAt": "2026-11-14T05:40:00Z",
-  "deliveredIn": null,
-  "notes": "由迭代 009 施工（用户指令：搭项目雏形 + 规定迭代原则，后续由其他 coding agent 迭代）。"
+  "deliveredIn": "009",
+  "notes": "由迭代 009 施工（用户指令：搭项目雏形 + 规定迭代原则，后续由其他 coding agent 迭代）。\n[史官勘误 2026-11-17] 迭代 009 已交付，工单状态漏关，本轮补齐。",
+  "acceptedAt": "2026-11-14"
 }

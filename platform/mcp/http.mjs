@@ -11,8 +11,9 @@ import { createReadStream, readFileSync, existsSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
-import { handleRpcMessage, ROOT } from './core.mjs';
+import { handleRpcMessage, ROOT, TOOLS } from './core.mjs';
 import { listTasks, createTask, setTaskStatus, getSession, appendMessages } from '../data-store.mjs';
+import { agentCard, orderToTask, listOrders, intakeTask } from '../a2a.mjs';
 
 const PORT = Number(process.env.PORT ?? 3000);
 const WEB_ROOT = resolve(join(ROOT, '.')); // 控制台与平台资产都在仓库根
@@ -168,6 +169,33 @@ async function handleApi(req, res, pathname, url) {
     json(res, 200, getSession(url.searchParams.get('agentId')));
     return true;
   }
+  // ---- A2A 互操作（ORD-015）：发现（agent card）→ 交接（任务对象）→ 凭证（工单状态机）
+  if (req.method === 'GET' && (pathname === '/.well-known/agent-card.json' || pathname === '/.well-known/agent.json')) {
+    json(res, 200, agentCard({ baseUrl: `http://${req.headers.host || 'localhost'}`, mcpTools: TOOLS }));
+    return true;
+  }
+  if (pathname === '/a2a/tasks') {
+    if (req.method === 'GET') {
+      json(res, 200, { tasks: listOrders().map((o) => orderToTask(o)) });
+      return true;
+    }
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', (c) => { body += c; });
+      req.on('end', () => {
+        try { json(res, 200, orderToTask(intakeTask(JSON.parse(body || '{}')))); }
+        catch (e) { json(res, 400, { error: e.message }); }
+      });
+      return true;
+    }
+  }
+  const a2aMatch = pathname.match(/^\/a2a\/tasks\/(ORD-\d+)$/);
+  if (a2aMatch && req.method === 'GET') {
+    const order = listOrders().find((o) => o.id === a2aMatch[1]);
+    if (!order) { json(res, 404, { error: `工单不存在: ${a2aMatch[1]}` }); return true; }
+    json(res, 200, orderToTask(order));
+    return true;
+  }
   return false;
 }
 
@@ -205,7 +233,7 @@ createServer(async (req, res) => {
     res.writeHead(405, { Allow: 'POST' }).end();
     return;
   }
-  if (pathname.startsWith('/api/')) {
+  if (pathname.startsWith('/api/') || pathname.startsWith('/a2a') || pathname.startsWith('/.well-known/')) {
     const handled = await handleApi(req, res, pathname, url);
     if (handled) return;
   }

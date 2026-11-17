@@ -203,3 +203,29 @@
 - **遗留线索**：会话持久化（k8s PVC）；agent 执行循环（LLM 自动调 MCP 工具，演示中小模型出现
   数字幻觉——工具循环是解药）；任务完成通知；本机 Docker Desktop 镜像服务故障（构建挂起，
   已用"Node Pod + exec 常驻"旁路运行，正式镜像化部署待 Docker 修复后执行 docker build + set image）。
+
+---
+
+## 迭代 010 · Agent 互操作层：工单对接 A2A 任务对象（2026-11-17）
+
+- **目标**：外部 agent 能以 A2A 方式发现本平台（Agent Card）、读写工单（任务对象）——平台间施工 = 发现+交接+凭证。
+- **认知来源**：A2A 规范（agent2agent.info/docs/concepts/agentcard、github.com/a2aproject/A2A docs/specification.md、
+  a2a-protocol.org/v0.2.4）——Agent Card 挂 /.well-known/agent-card.json（兼容旧 agent.json）；
+  Task 状态机 submitted/working/input-required/completed/failed/canceled。
+- **产物**：
+  - `platform/a2a.mjs`：纯函数映射层——orderToTask（状态映射 open→submitted/claimed→working/
+    delivered→completed/blocked→failed）、taskToOrderDraft（入站任务→工单草稿，leads 缺失时
+    按来源合成以满足工单 schema）、agentCard（3 skills：工单发现/发包接入/MCP 工具面）、intakeTask
+  - http.mjs 路由：GET /.well-known/agent-card.json（+旧 agent.json）、GET /a2a/tasks、
+    POST /a2a/tasks（外部 agent 向平台发包）、GET /a2a/tasks/:id
+  - verify 新增 [3.2/4] A2A 段：状态映射完整性、Card 形状、入站拒空与映射合法性
+- **新规律**：无新增（P2 工单驱动的平台间形态）。
+- **验收证据**：accept 五门全 PASS；A2A 三通道实测（Card 0.10.0 / 9 任务对象状态分布正确 /
+  入站任务→ORD-021 创建→演示后清理）；k8s 正式镜像化部署完成（0.10.0，清偿 009 部署债），
+  Pod 内真实对话 llmUsed=true，浏览器会话演示。
+- **提交**：见 git log。
+- **遗留线索**：A2A JSON-RPC message/send 形态（当前为 REST 子集）；入站任务自动挂 runbook；
+  agent 执行循环（对话幻觉再次印证其优先级）。
+- **史官勘误**：ORD-020 工单状态补齐为 delivered（009）。
+- **教训新增**：`kubectl apply` 用清单镜像 tag 回退了 `set image` 的结果（声明式与命令式混用）——
+  清单与线上一致性必须每次 apply 前核对；已收录 lessons.md。

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-14T10:33:43.404Z",
+  "generatedAt": "2026-11-17T15:44:40.022Z",
   "counts": {
     "orders": 9,
-    "ordersOpen": 4,
+    "ordersOpen": 3,
     "agents": 5,
     "laws": 12,
-    "iterations": 9,
+    "iterations": 10,
     "dispatches": 1,
     "mcpTools": 12
   },
@@ -13,7 +13,7 @@
     {
       "id": "ORD-020",
       "title": "平台雏形：对话与任务指挥（生产力核心）",
-      "status": "claimed",
+      "status": "delivered",
       "auto": false,
       "priority": 25,
       "scores": {
@@ -45,8 +45,9 @@
       ],
       "claimedBy": "zcode(bigmodel) · 迭代 009",
       "claimedAt": "2026-11-14T05:40:00Z",
-      "deliveredIn": null,
-      "notes": "由迭代 009 施工（用户指令：搭项目雏形 + 规定迭代原则，后续由其他 coding agent 迭代）。"
+      "deliveredIn": "009",
+      "notes": "由迭代 009 施工（用户指令：搭项目雏形 + 规定迭代原则，后续由其他 coding agent 迭代）。\n[史官勘误 2026-11-17] 迭代 009 已交付，工单状态漏关，本轮补齐。",
+      "acceptedAt": "2026-11-14"
     },
     {
       "id": "ORD-019",
@@ -203,7 +204,7 @@
     {
       "id": "ORD-015",
       "title": "Agent 互操作层：工单对接 A2A 任务对象",
-      "status": "open",
+      "status": "delivered",
       "priority": 16,
       "scores": {
         "impact": 5,
@@ -225,10 +226,11 @@
         "工单 ↔ A2A 任务对象的最小映射实现并测试",
         "verify/accept 全绿；账本登记"
       ],
-      "claimedBy": null,
-      "claimedAt": null,
-      "deliveredIn": null,
-      "notes": "考察锚点：K-002。当前 MCP 已覆盖 agent↔工具，本工单补 agent↔agent。"
+      "claimedBy": "zcode(bigmodel) · 迭代 010",
+      "claimedAt": "2026-11-17T02:00:00Z",
+      "deliveredIn": "010",
+      "notes": "考察锚点：K-002。当前 MCP 已覆盖 agent↔工具，本工单补 agent↔agent。",
+      "acceptedAt": "2026-11-17"
     },
     {
       "id": "ORD-014",
@@ -634,6 +636,13 @@
       "date": "2026-11-14",
       "goal": "方向纠正落地——平台是生产力工具：人类在控制台上与智能体聊天、下达任务指挥干活。搭建项目雏形，规定迭代原则，后续由其他 coding agent 迭代。",
       "clue": "会话持久化（k8s PVC）；agent 执行循环（LLM 自动调 MCP 工具，演示中小模型出现"
+    },
+    {
+      "n": 10,
+      "title": "Agent 互操作层：工单对接 A2A 任务对象",
+      "date": "2026-11-17",
+      "goal": "外部 agent 能以 A2A 方式发现本平台（Agent Card）、读写工单（任务对象）——平台间施工 = 发现+交接+凭证。",
+      "clue": "A2A JSON-RPC message/send 形态（当前为 REST 子集）；入站任务自动挂 runbook；"
     }
   ],
   "dispatches": [
